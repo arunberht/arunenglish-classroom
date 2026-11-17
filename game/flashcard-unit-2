@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบสุ่มคำศัพท์บทเรียน (Classroom Flashcard)</title>
+    <!-- โหลด Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- โหลดฟอนต์ภาษาไทย Prompt -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
+                    },
+                    colors: {
+                        cream: {
+                            50: '#FDFBF7',
+                            100: '#F7F3EB',
+                            200: '#EFE6D5',
+                        },
+                        navy: {
+                            800: '#1E293B',
+                            900: '#0F172A',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* สไตล์สำหรับแอนิเมชันพลิกการ์ด 3 มิติ */
+        .perspective-1000 {
+            perspective: 1200px;
+        }
+        
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-style: preserve-3d;
+        }
+        
+        .card-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .card-back {
+            transform: rotateY(180deg);
+        }
+
+        /* แอนิเมชันเด้งตอนสุ่มการ์ดใหม่ */
+        @keyframes popCard {
+            0% { transform: scale(0.95); opacity: 0.7; }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .animate-pop {
+            animation: popCard 0.35s ease-out forwards;
+        }
+
+        /* สไตล์ Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F7F3EB;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+    </style>
+</head>
+<body class="bg-cream-50 text-navy-900 min-h-screen flex flex-col selection:bg-amber-200 selection:text-navy-900">
+
+    <!-- แถบด้านบน (Header) -->
+    <header class="bg-white/90 backdrop-blur-md border-b border-cream-200 sticky top-0 z-30 shadow-xs">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
+            <!-- โลโก้และชื่อแอป -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-navy-900 text-amber-400 flex items-center justify-center shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold text-navy-900 leading-tight">แฟลชการ์ดสุ่มคำศัพท์ (จากบทเรียน)</h1>
+                    <p class="text-xs text-slate-500 hidden sm:block">แสดงความหมายก่อน (ขวา) แล้วคลิกเพื่อเฉลยคำศัพท์ (ซ้าย)</p>
+                </div>
+            </div>
+
+            <!-- ปุ่มควบคุมด้านขวา -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- ปุ่มเปิด/ปิดเสียง -->
+                <button id="soundToggleBtn" onclick="toggleSound()" class="p-2.5 rounded-xl bg-cream-100 hover:bg-cream-200 text-navy-800 transition-colors flex items-center gap-1.5 text-sm font-medium border border-cream-200" title="เปิด/ปิดเสียงเอฟเฟกต์">
+                    <span id="soundIconOn">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                        </svg>
+                    </span>
+                    <span id="soundIconOff" class="hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                        </svg>
+                    </span>
+                    <span class="hidden md:inline" id="soundText">เปิดเสียง</span>
+                </button>
+
+                <!-- ปุ่มจัดการคำศัพท์ -->
+                <button onclick="openModal()" class="px-4 py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 text-white font-medium text-sm sm:text-base shadow-sm transition-all flex items-center gap-2 active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    <span>จัดการคำศัพท์</span>
+                    <span id="badgeCount" class="bg-amber-400 text-navy-900 text-xs font-bold px-2 py-0.5 rounded-full">8</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- พื้นที่หลัก (Main Content) -->
+    <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8 flex flex-col justify-between gap-6">
+        
+        <!-- แถบสถานะและการตั้งค่าการสุ่ม -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-cream-200 flex flex-wrap items-center justify-between gap-4">
+            <!-- ตัวเลือกไม่สุ่มซ้ำ -->
+            <label class="flex items-center gap-3 cursor-pointer select-none">
+                <div class="relative">
+                    <input type="checkbox" id="noRepeatToggle" class="sr-only peer" checked onchange="handleToggleNoRepeat()">
+                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                </div>
+                <span class="text-sm sm:text-base font-medium text-navy-800">ไม่สุ่มซ้ำจนกว่าจะครบทุกคำ</span>
+            </label>
+
+            <!-- ตัวนับความคืบหน้าและปุ่มรีเซ็ต -->
+            <div class="flex items-center gap-3 ml-auto">
+                <div id="progressContainer" class="text-sm sm:text-base font-medium bg-cream-100 px-3.5 py-1.5 rounded-xl text-navy-800 border border-cream-200">
+                    เหลืออีก <span id="remainingCount" class="font-bold text-amber-600 text-lg">8</span> จาก <span id="totalCount" class="font-bold">8</span> คำ
+                </div>
+                <button onclick="resetDeck()" class="p-2 rounded-xl text-slate-500 hover:text-navy-900 hover:bg-cream-100 transition-colors" title="รีเซ็ตรอบการสุ่มใหม่ทั้งหมด">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- พื้นที่แฟลชการ์ดขนาดใหญ่ตรงกลาง -->
+        <div class="flex-1 flex flex-col items-center justify-center min-h-[360px] sm:min-h-[420px]">
+            <div id="cardWrapper" onclick="handleCardClick()" class="w-full max-w-3xl h-[340px] sm:h-[420px] perspective-1000 cursor-pointer select-none group">
+                <div id="flashcardInner" class="card-inner">
+                    
+                    <!-- ด้านหน้าการ์ด: จังหวะที่ 1 แสดง "ความหมาย" (ฝั่งขวา) -->
+                    <div id="cardFront" class="card-face bg-white rounded-3xl shadow-xl border-2 border-amber-200/90 p-6 sm:p-12 text-center transition-shadow group-hover:shadow-2xl">
+                        <!-- ป้ายกำกับสถานะด้านบน -->
+                        <div id="frontBadge" class="absolute top-6 left-6 sm:top-8 sm:left-8 flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 text-amber-800 font-semibold text-sm sm:text-base">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                            <span id="frontBadgeText">พร้อมเริ่มสุ่ม</span>
+                        </div>
+
+                        <div id="stepIndicatorFront" class="hidden absolute top-6 right-6 sm:top-8 sm:right-8 text-xs sm:text-sm font-medium text-slate-400 bg-slate-100 px-3 py-1 rounded-full">
+                            จังหวะที่ 1 / 2 (ทายคำศัพท์)
+                        </div>
+
+                        <!-- ข้อความแสดงความหมาย -->
+                        <div class="my-auto w-full px-4 overflow-y-auto max-h-[220px] sm:max-h-[260px] flex items-center justify-center">
+                            <p id="meaningDisplay" class="text-2xl sm:text-4xl md:text-5xl font-bold text-navy-900 leading-snug break-words">
+                                กดปุ่ม "สุ่มคำศัพท์" เพื่อเริ่ม
+                            </p>
+                        </div>
+
+                        <!-- คำแนะนำด้านล่างการ์ด -->
+                        <div id="frontHint" class="absolute bottom-6 text-slate-400 text-sm sm:text-base flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                            </svg>
+                            <span id="frontHintText">คลิกที่การ์ด หรือกด Spacebar เพื่อสุ่ม</span>
+                        </div>
+                    </div>
+
+                    <!-- ด้านหลังการ์ด: จังหวะที่ 2 เฉลย "คำศัพท์" (ฝั่งซ้าย) -->
+                    <div id="cardBack" class="card-face card-back bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl shadow-xl border-2 border-emerald-400 p-6 sm:p-12 text-center">
+                        <div class="absolute top-6 left-6 sm:top-8 sm:left-8 flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-600 text-white font-semibold text-sm sm:text-base shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span>เฉลยคำศัพท์</span>
+                        </div>
+
+                        <div class="absolute top-6 right-6 sm:top-8 sm:right-8 text-xs sm:text-sm font-medium text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">
+                            จังหวะที่ 2 / 2
+                        </div>
+
+                        <!-- แสดงคำศัพท์และประเภทคำ (ฝั่งซ้าย) พร้อมความหมาย -->
+                        <div class="my-auto w-full px-4 flex flex-col items-center justify-center gap-3">
+                            <h2 id="wordDisplay" class="text-3xl sm:text-5xl md:text-6xl font-bold text-emerald-950 tracking-tight break-words">
+                                Vocabulary
+                            </h2>
+                            <div class="w-16 h-1 bg-emerald-300 rounded-full"></div>
+                            <p id="meaningSubDisplay" class="text-lg sm:text-xl md:text-2xl font-medium text-emerald-800/80 break-words max-w-2xl">
+                                ความหมายของคำศัพท์
+                            </p>
+                        </div>
+
+                        <div class="absolute bottom-6 text-emerald-700/70 text-sm sm:text-base flex items-center gap-2">
+                            <span>คลิกที่การ์ด หรือกด Spacebar เพื่อสุ่มคำถัดไป</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ปุ่มควบคุมหลักด้านล่าง -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pb-2">
+            <button id="mainActionBtn" onclick="handleMainButtonClick()" class="w-full sm:w-auto min-w-[260px] px-8 py-4 rounded-2xl bg-amber-500 hover:bg-amber-600 text-navy-900 font-bold text-xl sm:text-2xl shadow-lg shadow-amber-500/20 transition-all transform active:scale-95 flex items-center justify-center gap-3">
+                <svg id="btnIconDraw" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <svg id="btnIconReveal" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <span id="mainActionText">สุ่มคำศัพท์</span>
+            </button>
+
+            <button id="skipBtn" onclick="drawNextCard()" class="hidden w-full sm:w-auto px-6 py-4 rounded-2xl bg-white hover:bg-cream-100 text-slate-600 font-semibold text-base sm:text-lg border border-cream-200 shadow-sm transition-all active:scale-95">
+                ข้ามไปสุ่มคำอื่น
+            </button>
+        </div>
+
+        <!-- คำแนะนำคีย์ลัด -->
+        <p class="text-center text-xs sm:text-sm text-slate-400">
+            เคล็ดลับ: กดปุ่ม <kbd class="px-2 py-0.5 bg-white border border-slate-200 rounded text-slate-600 shadow-xs">Spacebar</kbd> บนคีย์บอร์ดเพื่อสุ่มและเฉลยได้ทันที
+        </p>
+
+    </main>
+
+    <!-- Toast แจ้งเตือน -->
+    <div id="toastNotification" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-navy-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-700">
+            <span class="text-amber-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </span>
+            <span id="toastMessage" class="text-sm sm:text-base font-medium">ข้อความแจ้งเตือน</span>
+        </div>
+    </div>
+
+    <!-- Modal จัดการคำศัพท์ (พร้อมปุ่ม Export / Import) -->
+    <div id="manageModal" class="fixed inset-0 z-40 hidden bg-navy-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6">
+        <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-pop">
+            
+            <!-- ส่วนหัว Modal -->
+            <div class="px-6 py-4 bg-cream-50 border-b border-cream-200 flex items-center justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-navy-900">จัดการรายการคำศัพท์</h2>
+                    <p class="text-xs sm:text-sm text-slate-500">จัดการคำศัพท์จากบทเรียน หรือสำรองข้อมูลเก็บไว้ในเครื่อง</p>
+                </div>
+                <button onclick="closeModal()" class="p-2 rounded-xl text-slate-400 hover:text-navy-900 hover:bg-cream-200 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- แท็บเมนู -->
+            <div class="flex border-b border-cream-200 bg-white px-6 pt-2 gap-4 justify-between items-center flex-wrap">
+                <div class="flex gap-4">
+                    <button id="tabListBtn" onclick="switchTab('list')" class="pb-3 px-2 font-semibold text-sm sm:text-base border-b-2 border-navy-900 text-navy-900 transition-colors">
+                        รายการคำศัพท์ (<span id="modalTotalCount">8</span>)
+                    </button>
+                    <button id="tabBulkBtn" onclick="switchTab('bulk')" class="pb-3 px-2 font-semibold text-sm sm:text-base border-b-2 border-transparent text-slate-500 hover:text-navy-800 transition-colors">
+                        วางข้อมูลจาก Excel
+                    </button>
+                </div>
+
+                <!-- ปุ่ม Export / Import สำรองข้อมูล -->
+                <div class="flex items-center gap-2 pb-2">
+                    <button onclick="exportVocabFile()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-medium flex items-center gap-1.5 transition-colors border border-slate-200" title="ดาวน์โหลดไฟล์คำศัพท์เก็บไว้ในเครื่อง">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        <span>ดาวน์โหลดไฟล์</span>
+                    </button>
+                    <label class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-medium flex items-center gap-1.5 transition-colors border border-slate-200 cursor-pointer" title="อัปโหลดไฟล์คำศัพท์ที่เคยดาวน์โหลดไว้">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                        <span>อัปโหลดไฟล์</span>
+                        <input type="file" id="importFileInput" accept=".json,.csv,.txt" onchange="importVocabFile(event)" class="hidden">
+                    </label>
+                </div>
+            </div>
+
+            <!-- เนื้อหา Modal -->
+            <div class="flex-1 overflow-y-auto p-6">
+                
+                <!-- แท็บที่ 1: ตารางและเพิ่มคำ -->
+                <div id="tabListContent" class="space-y-6">
+                    <form onsubmit="addSingleItem(event)" class="bg-cream-50 p-4 rounded-2xl border border-cream-200 flex flex-col sm:flex-row gap-3">
+                        <div class="flex-1">
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">คำศัพท์ (ฝั่งซ้าย - เฉลย)</label>
+                            <input type="text" id="newWordInput" placeholder="เช่น criticize (v.)" required class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 focus:outline-none focus:border-navy-900 text-navy-900">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">ความหมาย (ฝั่งขวา - แสดงก่อน)</label>
+                            <input type="text" id="newMeaningInput" placeholder="เช่น saying what's wrong with something" required class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 focus:outline-none focus:border-navy-900 text-navy-900">
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-colors flex items-center justify-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                </svg>
+                                <span>เพิ่มคำ</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="border border-slate-200 rounded-2xl overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-xs sm:text-sm font-semibold text-slate-600">
+                                    <th class="py-3 px-4 w-12 text-center">#</th>
+                                    <th class="py-3 px-4">คำศัพท์ (ฝั่งซ้าย)</th>
+                                    <th class="py-3 px-4">ความหมาย (ฝั่งขวา)</th>
+                                    <th class="py-3 px-4 w-24 text-center">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vocabTableBody" class="divide-y divide-slate-100 text-sm sm:text-base">
+                                <!-- รายการคำศัพท์ -->
+                            </tbody>
+                        </table>
+                        <div id="emptyTableMessage" class="hidden py-12 text-center text-slate-400">
+                            ยังไม่มีรายการคำศัพท์ กรุณาเพิ่มคำศัพท์ด้านบน
+                        </div>
+                    </div>
+                </div>
+
+                <!-- แท็บที่ 2: วางข้อมูลแบบชุด -->
+                <div id="tabBulkContent" class="hidden space-y-4">
+                    <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-sm text-amber-900 space-y-1">
+                        <p class="font-semibold">วิธีใช้งานการวางข้อมูลจาก Excel:</p>
+                        <ul class="list-disc list-inside text-amber-800 space-y-0.5">
+                            <li>คัดลอก 2 คอลัมน์ (คำศัพท์ และ ความหมาย) จาก Excel หรือ Google Sheets แล้ววางลงในช่องด้านล่างได้ทันที</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-navy-800 mb-2">วางข้อมูลที่นี่:</label>
+                        <textarea id="bulkTextarea" rows="8" placeholder="criticize (v.) - saying what's wrong with something&#10;appearance (n.) - the way someone looks" class="w-full p-4 rounded-2xl border border-slate-300 focus:outline-none focus:border-navy-900 font-sans text-sm sm:text-base leading-relaxed"></textarea>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+                        <div class="flex items-center gap-4">
+                            <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                                <input type="radio" name="bulkMode" value="append" checked class="text-navy-900">
+                                <span>เพิ่มต่อท้ายรายการเดิม</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                                <input type="radio" name="bulkMode" value="replace" class="text-navy-900">
+                                <span>ล้างของเดิมและแทนที่ทั้งหมด</span>
+                            </label>
+                        </div>
+
+                        <button onclick="processBulkInput()" class="px-6 py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 text-white font-semibold transition-colors shadow-sm">
+                            นำเข้าข้อมูล
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ส่วนท้าย Modal -->
+            <div class="px-6 py-3.5 bg-cream-50 border-t border-cream-200 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <button onclick="loadDefaultSample()" class="text-xs sm:text-sm text-slate-600 hover:text-navy-900 underline px-2 py-1">
+                        โหลดชุดคำศัพท์จากบทเรียนนี้
+                    </button>
+                    <span class="text-slate-300">|</span>
+                    <button onclick="clearAllVocab()" class="text-xs sm:text-sm text-rose-600 hover:text-rose-700 underline px-2 py-1">
+                        ล้างทั้งหมด
+                    </button>
+                </div>
+                <button onclick="closeModal()" class="px-6 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-navy-900 font-bold text-sm sm:text-base transition-colors">
+                    เสร็จสิ้น
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // ข้อมูล 8 คำศัพท์จากรูปภาพที่คุณครูส่งมา
+        // ==========================================
+        const LESSON_VOCAB = [
+            { id: 1, word: "criticize (v.)", meaning: "saying what's wrong with something" },
+            { id: 2, word: "appearance (n.)", meaning: "the way someone looks" },
+            { id: 3, word: "confident (adj.)", meaning: "believing in yourself and your abilities" },
+            { id: 4, word: "message (n.)", meaning: "A written note sent electronically" },
+            { id: 5, word: "remind (v.)", meaning: "Helped someone remember" },
+            { id: 6, word: "judge (v.)", meaning: "to give your opinion about somebody" },
+            { id: 7, word: "define (v.)", meaning: "to describe or show the nature or range of somebody/something" },
+            { id: 8, word: "whisper (v.)", meaning: "to speak very quietly to somebody" }
+        ];
+
+        const STORAGE_KEY = 'classroom_flashcard_lesson_image_v1';
+        const SOUND_PREF_KEY = 'classroom_flashcard_sound_v1';
+
+        let vocabList = [];
+        let remainingIndices = [];
+        let currentCard = null;
+        let cardState = 'IDLE'; // 'IDLE', 'SHOWING_MEANING', 'SHOWING_WORD'
+        let isSoundEnabled = true;
+        let audioCtx = null;
+        let editingId = null;
+
+        // ==========================================
+        // ระบบเสียง (Web Audio API)
+        // ==========================================
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSound(type) {
+            if (!isSoundEnabled) return;
+            try {
+                initAudio();
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'draw') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(380, now);
+                    osc.frequency.exponentialRampToValueAtTime(620, now + 0.12);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                } else if (type === 'reveal') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.09);
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.36);
+                }
+            } catch (e) {
+                console.warn("Audio warning:", e);
+            }
+        }
+
+        function toggleSound() {
+            isSoundEnabled = !isSoundEnabled;
+            localStorage.setItem(SOUND_PREF_KEY, JSON.stringify(isSoundEnabled));
+            updateSoundUI();
+            if (isSoundEnabled) playSound('draw');
+        }
+
+        function updateSoundUI() {
+            const iconOn = document.getElementById('soundIconOn');
+            const iconOff = document.getElementById('soundIconOff');
+            const text = document.getElementById('soundText');
+            if (isSoundEnabled) {
+                iconOn.classList.remove('hidden');
+                iconOff.classList.add('hidden');
+                text.textContent = 'เปิดเสียง';
+            } else {
+                iconOn.classList.add('hidden');
+                iconOff.classList.remove('hidden');
+                text.textContent = 'ปิดเสียง';
+            }
+        }
+
+        // ==========================================
+        // การโหลดและบันทึกข้อมูล
+        // ==========================================
+        function loadData() {
+            try {
+                const savedSound = localStorage.getItem(SOUND_PREF_KEY);
+                if (savedSound !== null) isSoundEnabled = JSON.parse(savedSound);
+                updateSoundUI();
+
+                const savedVocab = localStorage.getItem(STORAGE_KEY);
+                if (savedVocab) {
+                    vocabList = JSON.parse(savedVocab);
+                } else {
+                    vocabList = [...LESSON_VOCAB];
+                    saveData();
+                }
+            } catch (e) {
+                vocabList = [...LESSON_VOCAB];
+            }
+            resetDeck(false);
+            updateCounters();
+        }
+
+        function saveData() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(vocabList));
+            } catch (e) {
+                showToast("ไม่สามารถบันทึกข้อมูลได้");
+            }
+            updateCounters();
+        }
+
+        // ==========================================
+        // ลอจิกการสุ่ม 2 จังหวะ
+        // ==========================================
+        function resetDeck(showNotification = true) {
+            remainingIndices = vocabList.map((_, index) => index);
+            cardState = 'IDLE';
+            currentCard = null;
+            
+            const cardInner = document.getElementById('flashcardInner');
+            cardInner.classList.remove('is-flipped');
+            
+            document.getElementById('frontBadgeText').textContent = 'พร้อมเริ่มสุ่ม';
+            document.getElementById('frontBadge').className = 'absolute top-6 left-6 sm:top-8 sm:left-8 flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 font-semibold text-sm sm:text-base';
+            document.getElementById('stepIndicatorFront').classList.add('hidden');
+            
+            document.getElementById('meaningDisplay').textContent = vocabList.length > 0 
+                ? 'กดปุ่ม "สุ่มคำศัพท์" เพื่อเริ่ม' 
+                : 'ยังไม่มีคำศัพท์';
+            document.getElementById('meaningDisplay').className = 'text-2xl sm:text-4xl md:text-5xl font-bold text-slate-400 leading-snug break-words';
+            document.getElementById('frontHintText').textContent = 'คลิกที่การ์ด หรือกด Spacebar';
+
+            updateMainButtonUI();
+            updateCounters();
+            
+            if (showNotification) showToast("รีเซ็ตรอบการสุ่มเรียบร้อยแล้ว");
+        }
+
+        function handleCardClick() {
+            if (vocabList.length === 0) { openModal(); return; }
+            if (cardState === 'IDLE') {
+                drawNextCard();
+            } else if (cardState === 'SHOWING_MEANING') {
+                revealWord();
+            } else if (cardState === 'SHOWING_WORD') {
+                drawNextCard();
+            }
+        }
+
+        function handleMainButtonClick() {
+            if (vocabList.length === 0) { openModal(); return; }
+            if (cardState === 'SHOWING_MEANING') {
+                revealWord();
+            } else {
+                drawNextCard();
+            }
+        }
+
+        // จังหวะที่ 1: สุ่มแสดง "ความหมาย" (ฝั่งขวา)
+        function drawNextCard() {
+            if (vocabList.length === 0) { openModal(); return; }
+
+            const noRepeat = document.getElementById('noRepeatToggle').checked;
+            let chosenIndex;
+
+            if (noRepeat) {
+                if (remainingIndices.length === 0) {
+                    remainingIndices = vocabList.map((_, idx) => idx);
+                    showToast("สุ่มครบทุกคำแล้ว! เริ่มรอบใหม่ให้อัตโนมัติ");
+                }
+                const randPos = Math.floor(Math.random() * remainingIndices.length);
+                chosenIndex = remainingIndices[randPos];
+                remainingIndices.splice(randPos, 1);
+            } else {
+                if (vocabList.length > 1 && currentCard) {
+                    const currentIdx = vocabList.findIndex(item => item.id === currentCard.id);
+                    do {
+                        chosenIndex = Math.floor(Math.random() * vocabList.length);
+                    } while (chosenIndex === currentIdx);
+                } else {
+                    chosenIndex = Math.floor(Math.random() * vocabList.length);
+                }
+            }
+
+            currentCard = vocabList[chosenIndex];
+            cardState = 'SHOWING_MEANING';
+
+            const cardInner = document.getElementById('flashcardInner');
+            const cardWrapper = document.getElementById('cardWrapper');
+            
+            const updateFrontContent = () => {
+                document.getElementById('frontBadgeText').textContent = 'ความหมาย (ทายคำศัพท์ฝั่งซ้าย)';
+                document.getElementById('frontBadge').className = 'absolute top-6 left-6 sm:top-8 sm:left-8 flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 text-amber-800 font-semibold text-sm sm:text-base';
+                document.getElementById('stepIndicatorFront').classList.remove('hidden');
+                
+                const meaningEl = document.getElementById('meaningDisplay');
+                meaningEl.textContent = currentCard.meaning;
+                meaningEl.className = 'text-2xl sm:text-4xl md:text-5xl font-bold text-navy-900 leading-snug break-words';
+                
+                document.getElementById('frontHintText').textContent = 'อ่านจบแล้ว คลิกที่การ์ดเพื่อเฉลยคำศัพท์';
+
+                cardWrapper.classList.remove('animate-pop');
+                void cardWrapper.offsetWidth;
+                cardWrapper.classList.add('animate-pop');
+            };
+
+            if (cardInner.classList.contains('is-flipped')) {
+                cardInner.classList.remove('is-flipped');
+                setTimeout(updateFrontContent, 180);
+            } else {
+                updateFrontContent();
+            }
+
+            playSound('draw');
+            updateMainButtonUI();
+            updateCounters();
+        }
+
+        // จังหวะที่ 2: พลิกเฉลย "คำศัพท์" (ฝั่งซ้าย)
+        function revealWord() {
+            if (!currentCard || cardState !== 'SHOWING_MEANING') return;
+
+            cardState = 'SHOWING_WORD';
+            document.getElementById('wordDisplay').textContent = currentCard.word;
+            document.getElementById('meaningSubDisplay').textContent = currentCard.meaning;
+            document.getElementById('flashcardInner').classList.add('is-flipped');
+
+            playSound('reveal');
+            updateMainButtonUI();
+        }
+
+        function updateMainButtonUI() {
+            const btn = document.getElementById('mainActionBtn');
+            const btnText = document.getElementById('mainActionText');
+            const iconDraw = document.getElementById('btnIconDraw');
+            const iconReveal = document.getElementById('btnIconReveal');
+            const skipBtn = document.getElementById('skipBtn');
+
+            if (cardState === 'SHOWING_MEANING') {
+                btn.className = 'w-full sm:w-auto min-w-[260px] px-8 py-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xl sm:text-2xl shadow-lg shadow-emerald-600/20 transition-all transform active:scale-95 flex items-center justify-center gap-3';
+                btnText.textContent = 'ดูคำศัพท์ / เฉลย';
+                iconDraw.classList.add('hidden');
+                iconReveal.classList.remove('hidden');
+                skipBtn.classList.remove('hidden');
+            } else {
+                btn.className = 'w-full sm:w-auto min-w-[260px] px-8 py-4 rounded-2xl bg-amber-500 hover:bg-amber-600 text-navy-900 font-bold text-xl sm:text-2xl shadow-lg shadow-amber-500/20 transition-all transform active:scale-95 flex items-center justify-center gap-3';
+                btnText.textContent = cardState === 'IDLE' ? 'สุ่มคำศัพท์' : 'สุ่มคำถัดไป';
+                iconDraw.classList.remove('hidden');
+                iconReveal.classList.add('hidden');
+                skipBtn.classList.add('hidden');
+            }
+        }
+
+        function handleToggleNoRepeat() {
+            const noRepeat = document.getElementById('noRepeatToggle').checked;
+            const progressContainer = document.getElementById('progressContainer');
+            if (noRepeat) {
+                progressContainer.classList.remove('opacity-40');
+                resetDeck(false);
+            } else {
+                progressContainer.classList.add('opacity-40');
+            }
+            updateCounters();
+        }
+
+        function updateCounters() {
+            const total = vocabList.length;
+            const remaining = remainingIndices.length;
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('remainingCount').textContent = remaining;
+            document.getElementById('badgeCount').textContent = total;
+            document.getElementById('modalTotalCount').textContent = total;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            const isModalOpen = !document.getElementById('manageModal').classList.contains('hidden');
+            const activeTag = document.activeElement.tagName.toLowerCase();
+            if (isModalOpen || activeTag === 'input' || activeTag === 'textarea') return;
+
+            if (e.code === 'Space') {
+                e.preventDefault();
+                handleCardClick();
+            }
+        });
+
+        // ==========================================
+        // การจัดการ Modal และ CRUD
+        // ==========================================
+        function openModal() {
+            editingId = null;
+            renderVocabTable();
+            document.getElementById('manageModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            editingId = null;
+            document.getElementById('manageModal').classList.add('hidden');
+        }
+
+        function switchTab(tabName) {
+            const tabListBtn = document.getElementById('tabListBtn');
+            const tabBulkBtn = document.getElementById('tabBulkBtn');
+            const tabListContent = document.getElementById('tabListContent');
+            const tabBulkContent = document.getElementById('tabBulkContent');
+
+            if (tabName === 'list') {
+                tabListBtn.className = 'pb-3 px-2 font-semibold text-sm sm:text-base border-b-2 border-navy-900 text-navy-900 transition-colors';
+                tabBulkBtn.className = 'pb-3 px-2 font-semibold text-sm sm:text-base border-b-2 border-transparent text-slate-500 hover:text-navy-800 transition-colors';
+                tabListContent.classList.remove('hidden');
+                tabBulkContent.classList.add('hidden');
+                renderVocabTable();
+            } else {
+                tabBulkBtn.className = 'pb-3 px-2 font-semibold text-sm sm:text-base border-b-2 border-navy-900 text-navy-900 transition-colors';
+                tabListBtn.className = 'pb-3 px-2 font-semibold text-sm sm:text-base border-b-2 border-transparent text-slate-500 hover:text-navy-800 transition-colors';
+                tabBulkContent.classList.remove('hidden');
+                tabListContent.classList.add('hidden');
+            }
+        }
+
+        function renderVocabTable() {
+            const tbody = document.getElementById('vocabTableBody');
+            const emptyMsg = document.getElementById('emptyTableMessage');
+            tbody.innerHTML = '';
+
+            if (vocabList.length === 0) {
+                emptyMsg.classList.remove('hidden');
+                return;
+            }
+            emptyMsg.classList.add('hidden');
+
+            vocabList.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-cream-50/70 transition-colors';
+
+                if (editingId === item.id) {
+                    tr.innerHTML = `
+                        <td class="py-2.5 px-4 text-center text-slate-400 font-medium">${index + 1}</td>
+                        <td class="py-2.5 px-4"><input type="text" id="editWord_${item.id}" value="${escapeHtml(item.word)}" class="w-full px-2.5 py-1.5 rounded-lg border border-navy-900 bg-white text-navy-900 font-medium"></td>
+                        <td class="py-2.5 px-4"><input type="text" id="editMeaning_${item.id}" value="${escapeHtml(item.meaning)}" class="w-full px-2.5 py-1.5 rounded-lg border border-navy-900 bg-white text-navy-900"></td>
+                        <td class="py-2.5 px-4 text-center">
+                            <div class="flex items-center justify-center gap-1">
+                                <button onclick="saveEditItem(${item.id})" class="p-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700" title="บันทึก"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg></button>
+                                <button onclick="cancelEdit()" class="p-1.5 rounded-lg bg-slate-200 text-slate-600 hover:bg-slate-300" title="ยกเลิก"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                            </div>
+                        </td>
+                    `;
+                } else {
+                    tr.innerHTML = `
+                        <td class="py-3 px-4 text-center text-slate-400 font-medium">${index + 1}</td>
+                        <td class="py-3 px-4 font-semibold text-navy-900">${escapeHtml(item.word)}</td>
+                        <td class="py-3 px-4 text-slate-700">${escapeHtml(item.meaning)}</td>
+                        <td class="py-3 px-4 text-center">
+                            <div class="flex items-center justify-center gap-1">
+                                <button onclick="startEditItem(${item.id})" class="p-1.5 rounded-lg text-slate-400 hover:text-navy-900 hover:bg-slate-100 transition-colors" title="แก้ไข"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>
+                                <button onclick="deleteItem(${item.id})" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors" title="ลบ"><svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                            </div>
+                        </td>
+                    `;
+                }
+                tbody.appendChild(tr);
+            });
+        }
+
+        function addSingleItem(e) {
+            e.preventDefault();
+            const wordInput = document.getElementById('newWordInput');
+            const meaningInput = document.getElementById('newMeaningInput');
+            const word = wordInput.value.trim();
+            const meaning = meaningInput.value.trim();
+            if (!word || !meaning) return;
+
+            const newId = Date.now() + Math.random();
+            vocabList.push({ id: newId, word, meaning });
+            remainingIndices.push(vocabList.length - 1);
+            saveData();
+            renderVocabTable();
+            wordInput.value = '';
+            meaningInput.value = '';
+            wordInput.focus();
+            showToast(`เพิ่มคำว่า "${word}" เรียบร้อยแล้ว`);
+        }
+
+        function startEditItem(id) { editingId = id; renderVocabTable(); }
+        function cancelEdit() { editingId = null; renderVocabTable(); }
+
+        function saveEditItem(id) {
+            const wordVal = document.getElementById(`editWord_${id}`).value.trim();
+            const meaningVal = document.getElementById(`editMeaning_${id}`).value.trim();
+            if (!wordVal || !meaningVal) { showToast("กรุณากรอกข้อมูลให้ครบ"); return; }
+            const idx = vocabList.findIndex(item => item.id === id);
+            if (idx !== -1) {
+                vocabList[idx].word = wordVal;
+                vocabList[idx].meaning = meaningVal;
+                saveData();
+                if (currentCard && currentCard.id === id) {
+                    currentCard = vocabList[idx];
+                    document.getElementById('meaningDisplay').textContent = currentCard.meaning;
+                    document.getElementById('wordDisplay').textContent = currentCard.word;
+                    document.getElementById('meaningSubDisplay').textContent = currentCard.meaning;
+                }
+            }
+            editingId = null;
+            renderVocabTable();
+            showToast("บันทึกการแก้ไขแล้ว");
+        }
+
+        function deleteItem(id) {
+            vocabList = vocabList.filter(item => item.id !== id);
+            saveData();
+            resetDeck(false);
+            renderVocabTable();
+            showToast("ลบรายการเรียบร้อยแล้ว");
+        }
+
+        function processBulkInput() {
+            const rawText = document.getElementById('bulkTextarea').value;
+            const lines = rawText.split(/\r?\n/);
+            const parsedItems = [];
+
+            lines.forEach((line, idx) => {
+                const trimmed = line.trim();
+                if (!trimmed) return;
+                let word = '', meaning = '';
+
+                if (trimmed.includes('\t')) {
+                    const parts = trimmed.split('\t');
+                    word = parts[0].trim();
+                    meaning = parts.slice(1).join(' ').trim();
+                } else if (trimmed.includes('=')) {
+                    const eqIdx = trimmed.indexOf('=');
+                    word = trimmed.slice(0, eqIdx).trim();
+                    meaning = trimmed.slice(eqIdx + 1).trim();
+                } else if (trimmed.includes(' - ') || trimmed.includes('-')) {
+                    const dashIdx = trimmed.indexOf('-');
+                    word = trimmed.slice(0, dashIdx).trim();
+                    meaning = trimmed.slice(dashIdx + 1).trim();
+                } else if (trimmed.includes(',')) {
+                    const commaIdx = trimmed.indexOf(',');
+                    word = trimmed.slice(0, commaIdx).trim();
+                    meaning = trimmed.slice(commaIdx + 1).trim();
+                }
+
+                if (word && meaning) {
+                    parsedItems.push({ id: Date.now() + idx + Math.random(), word, meaning });
+                }
+            });
+
+            if (parsedItems.length === 0) {
+                showToast("ไม่พบข้อมูลรูปแบบที่ถูกต้อง");
+                return;
+            }
+
+            const mode = document.querySelector('input[name="bulkMode"]:checked').value;
+            if (mode === 'replace') vocabList = parsedItems;
+            else vocabList = [...vocabList, ...parsedItems];
+
+            saveData();
+            resetDeck(false);
+            document.getElementById('bulkTextarea').value = '';
+            switchTab('list');
+            showToast(`นำเข้าสำเร็จ ${parsedItems.length} รายการ`);
+        }
+
+        function loadDefaultSample() {
+            vocabList = [...LESSON_VOCAB];
+            saveData();
+            resetDeck(false);
+            renderVocabTable();
+            showToast("โหลดชุดคำศัพท์จากบทเรียนเรียบร้อยแล้ว");
+        }
+
+        function clearAllVocab() {
+            vocabList = [];
+            saveData();
+            resetDeck(false);
+            renderVocabTable();
+            showToast("ล้างรายการคำศัพท์ทั้งหมดแล้ว");
+        }
+
+        // ==========================================
+        // ฟังก์ชัน Export / Import ไฟล์
+        // ==========================================
+        function exportVocabFile() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(vocabList, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "classroom_vocab_lesson.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast("ดาวน์โหลดไฟล์สำรองเรียบร้อยแล้ว");
+        }
+
+        function importVocabFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported) && imported.length > 0 && imported[0].word) {
+                        vocabList = imported;
+                        saveData();
+                        resetDeck(false);
+                        renderVocabTable();
+                        showToast(`นำเข้าคำศัพท์สำเร็จ ${vocabList.length} รายการ`);
+                    } else {
+                        showToast("รูปแบบไฟล์ไม่ถูกต้อง");
+                    }
+                } catch (err) {
+                    showToast("เกิดข้อผิดพลาดในการอ่านไฟล์");
+                }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        // ==========================================
+        // ฟังก์ชันเสริม
+        // ==========================================
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        let toastTimeout;
+        function showToast(message) {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        window.onload = function() {
+            loadData();
+        };
+    </script>
+</body>
+</html>
+```
+### eof
