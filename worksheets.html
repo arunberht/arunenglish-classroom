@@ -42,6 +42,142 @@ h1 {
 .back {
   color: #3977ce;
 }
+/* ✨ ENCHANTED STUDY LIBRARY */
+
+body {
+  font-family: 'Georgia', serif;
+  color: #38244f;
+  background:
+    linear-gradient(
+      rgba(43, 25, 65, 0.48),
+      rgba(65, 37, 83, 0.58)
+    ),
+    url('enchanted-library.png') center center / cover fixed;
+  min-height: 100vh;
+  padding: 35px 20px;
+}
+
+/* Royal Purple Heading */
+h1 {
+  color: #d8b875;
+  font-size: 42px;
+  text-shadow: 0 3px 15px rgba(20, 10, 35, 0.65);
+  letter-spacing: 1px;
+  margin-bottom: 18px;
+}
+
+/* Subtitle */
+body > p {
+  color: #fff2d2;
+  font-size: 18px;
+  margin-bottom: 25px;
+}
+
+/* Enchanted Paper Cards */
+.category {
+  display: block;
+  background: linear-gradient(
+    135deg,
+    #fffaf0,
+    #f5e8ce
+  );
+  padding: 25px;
+  margin: 20px 0;
+  border: 1px solid #d8b875;
+  border-radius: 18px;
+  text-decoration: none;
+  color: #38244f;
+  box-shadow: 0 8px 25px rgba(15, 8, 30, 0.28);
+  transition: all 0.35s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.category:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(216, 184, 117, 0.35);
+  border-color: #f5d99b;
+}
+
+.category h2 {
+  color: #60427e;
+  font-size: 25px;
+  margin: 5px 0 12px;
+}
+
+.category p {
+  color: #786783;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Golden Sparkles */
+.category::after {
+  content: "✦";
+  position: absolute;
+  right: 22px;
+  top: 15px;
+  color: #d8b875;
+  font-size: 25px;
+  opacity: 0.65;
+  animation: sparkle 2.5s ease-in-out infinite alternate;
+}
+
+.category:nth-child(2)::after {
+  animation-delay: 0.5s;
+}
+
+.category:nth-child(3)::after {
+  animation-delay: 1s;
+}
+
+.category:nth-child(4)::after {
+  animation-delay: 1.5s;
+}
+
+@keyframes sparkle {
+  from {
+    opacity: 0.3;
+    transform: scale(0.8) rotate(0deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.2) rotate(25deg);
+  }
+}
+
+/* Back to Home */
+.back {
+  color: #f5d99b;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.back:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+/* Mobile Friendly */
+@media (max-width: 600px) {
+  body {
+    padding: 25px 16px;
+    background-attachment: scroll;
+  }
+
+  h1 {
+    font-size: 32px;
+  }
+
+  .category {
+    padding: 20px;
+  }
+
+  .category h2 {
+    font-size: 21px;
+  }
+}
+
 </style>
 </head>
 
