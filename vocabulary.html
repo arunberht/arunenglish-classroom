@@ -1,0 +1,171 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vocabulary | Arun's Classroom</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --purple: #60427e;
+  --plum: #38244f;
+  --gold: #d8b875;
+  --cream: #fffaf2;
+  --pink: #f5dce9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  color: var(--plum);
+  background:
+    linear-gradient(rgba(43,25,65,.48), rgba(65,37,83,.58)),
+    url('enchanted-library.png') center center / cover fixed;
+  padding: 35px 20px 60px;
+}
+
+.container {
+  max-width: 950px;
+  margin: auto;
+}
+
+.back {
+  display: inline-block;
+  color: var(--cream);
+  text-decoration: none;
+  font-size: 15px;
+  margin-bottom: 35px;
+}
+
+.back:hover {
+  color: var(--gold);
+  text-decoration: underline;
+}
+
+header {
+  text-align: center;
+  color: white;
+  margin-bottom: 40px;
+}
+
+header .icon {
+  font-size: 55px;
+}
+
+h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 54px;
+  margin: 8px 0;
+  color: #f5dce9;
+  letter-spacing: 2px;
+}
+
+header p {
+  font-size: 16px;
+  color: #fffaf2;
+}
+
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  color: var(--gold);
+  font-size: 30px;
+  margin-bottom: 18px;
+}
+
+.card {
+  display: block;
+  background: linear-gradient(135deg, #fffaf2, #f5eaf3);
+  border: 2px solid var(--gold);
+  border-radius: 24px;
+  padding: 28px;
+  margin-bottom: 22px;
+  text-decoration: none;
+  color: var(--plum);
+  box-shadow: 0 8px 25px #160d243d;
+  transition: .25s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 30px #160d2460;
+}
+
+.card h2 {
+  font-size: 23px;
+  margin: 0 0 8px;
+}
+
+.card p {
+  color: #75647d;
+  margin: 0 0 18px;
+  line-height: 1.7;
+}
+
+.play {
+  display: inline-block;
+  background: #c8a9d8;
+  color: var(--plum);
+  padding: 10px 24px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+footer {
+  text-align: center;
+  color: #fffaf2;
+  margin-top: 45px;
+  font-size: 13px;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 25px 16px 45px;
+    background-attachment: scroll;
+  }
+
+  h1 {
+    font-size: 42px;
+  }
+
+  .card {
+    padding: 23px;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<a class="back" href="index.html">← Back to Home</a>
+
+<header>
+  <div class="icon">📚✨</div>
+  <h1>Vocabulary</h1>
+  <p>Discover new words. Build your word power.</p>
+</header>
+
+<h2 class="section-title">✦ Explore the Word Library ✦</h2>
+
+<a class="card" href="game/flashcard-unit-2.html">
+  <h2>🃏 Flashcard Unit 2</h2>
+  <p>Discover new words and practice your vocabulary.</p>
+  <span class="play">START LEARNING ✦</span>
+</a>
+
+<footer>
+  ✧ Every new word opens a new world. ✧
+</footer>
+
+</div>
+</body>
+</html>
