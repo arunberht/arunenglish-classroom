@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Must & Mustn't - Classroom Randomizer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Poppins for crisp English & Prompt for Thai UI -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Canvas Confetti for Celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Prompt', 'Poppins', sans-serif;
+            background: radial-gradient(circle at top left, #eef2ff 0%, #e0e7ff 45%, #f8fafc 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .font-en {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Custom 3D Tactile Buttons */
+        .btn-3d {
+            transition: all 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 6px 0 var(--shadow-color, #3730a3), 0 10px 20px rgba(0, 0, 0, 0.12);
+        }
+        .btn-3d:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 var(--shadow-color, #3730a3), 0 14px 24px rgba(0, 0, 0, 0.16);
+        }
+        .btn-3d:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 var(--shadow-color, #3730a3), 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .btn-3d:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4px 0 #94a3b8;
+        }
+
+        /* Blank Slot Pill Styling */
+        .blank-slot {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 145px;
+            padding: 0.35rem 1.1rem;
+            border-radius: 1rem;
+            border: 3px dashed #818cf8;
+            background-color: #eef2ff;
+            color: #6366f1;
+            font-weight: 700;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            vertical-align: middle;
+        }
+
+        @media (min-width: 768px) {
+            .blank-slot {
+                min-width: 190px;
+                padding: 0.5rem 1.5rem;
+            }
+        }
+
+        .blank-slot.revealed-subject {
+            border-style: solid;
+            border-color: #3b82f6;
+            background-color: #dbeafe;
+            color: #1d4ed8;
+            transform: scale(1.03);
+        }
+
+        .blank-slot.revealed-must {
+            border-style: solid;
+            border-color: #10b981;
+            background-color: #d1fae5;
+            color: #047857;
+            transform: scale(1.03);
+        }
+
+        .blank-slot.revealed-mustnt {
+            border-style: solid;
+            border-color: #f43f5e;
+            background-color: #ffe4e6;
+            color: #be123c;
+            transform: scale(1.03);
+        }
+
+        /* Card Spin Animation */
+        @keyframes cardPop {
+            0% { transform: scale(0.95); opacity: 0.7; }
+            60% { transform: scale(1.02); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: cardPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes pulseUrgent {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        .timer-urgent {
+            animation: pulseUrgent 0.6s infinite;
+        }
+    </style>
+</head>
+<body class="flex flex-col justify-between text-slate-800 select-none">
+
+    <!-- Top Navigation / Status Bar -->
+    <header class="w-full max-w-6xl mx-auto px-4 pt-4 pb-2 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md text-xl">
+                <i class="fa-solid fa-dice"></i>
+            </div>
+            <div>
+                <h1 class="text-lg sm:text-xl font-bold text-slate-900 leading-tight">
+                    Sentence Builder <span class="text-indigo-600 font-en">Must / Mustn't</span>
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-500">เกมสุ่มโจทย์สอบพูดแต่งประโยคภาษาอังกฤษ</p>
+            </div>
+        </div>
+
+        <!-- Controls & Counters -->
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+            <!-- Remaining Counter Badge -->
+            <div id="counterBadge" class="bg-white border border-indigo-100 px-3.5 py-2 rounded-2xl shadow-sm flex items-center gap-2 text-sm font-semibold text-slate-700">
+                <i class="fa-solid fa-layer-group text-indigo-500"></i>
+                <span>เหลือ: <strong id="remainingCount" class="text-indigo-600 text-base">25</strong> / 25 ข้อ</span>
+            </div>
+
+            <!-- No-Repeat Toggle -->
+            <button id="repeatModeBtn" onclick="toggleRepeatMode()" title="สลับโหมดสุ่มซ้ำหรือไม่ซ้ำ"
+                class="bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-2xl shadow-sm flex items-center gap-2 text-xs sm:text-sm font-medium text-slate-700 transition">
+                <i id="repeatIcon" class="fa-solid fa-ban text-emerald-600"></i>
+                <span id="repeatText">ไม่สุ่มซ้ำข้อเดิม</span>
+            </button>
+
+            <!-- Question List Button -->
+            <button onclick="openListModal()" title="ดูรายการโจทย์ทั้งหมด 25 ข้อ"
+                class="bg-white hover:bg-indigo-50 border border-slate-200 px-3.5 py-2 rounded-2xl shadow-sm flex items-center gap-2 text-xs sm:text-sm font-medium text-indigo-700 transition">
+                <i class="fa-solid fa-list-check"></i>
+                <span class="hidden sm:inline">รายการโจทย์</span>
+            </button>
+
+            <!-- Sound Mute Toggle -->
+            <button id="soundBtn" onclick="toggleSound()" title="เปิด/ปิดเสียงเอฟเฟกต์"
+                class="bg-white hover:bg-slate-50 border border-slate-200 w-10 h-10 rounded-2xl shadow-sm flex items-center justify-center text-slate-700 transition">
+                <i id="soundIcon" class="fa-solid fa-volume-high text-indigo-600"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Stage Area -->
+    <main class="flex-1 w-full max-w-5xl mx-auto px-4 py-4 flex flex-col items-center justify-center">
+        
+        <!-- Flashcard Display -->
+        <div id="cardContainer" class="w-full bg-white rounded-3xl shadow-xl border-2 border-indigo-100 p-6 sm:p-10 md:p-12 relative overflow-hidden transition-all">
+            
+            <!-- Decorative Top Accent Bar -->
+            <div class="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+
+            <!-- Card Header Info: Question Number & Quick Timer -->
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-6 sm:mb-8">
+                <div class="flex items-center gap-2.5">
+                    <span id="qNumberBadge" class="px-4 py-1.5 rounded-full bg-indigo-100 text-indigo-700 font-bold text-sm sm:text-base">
+                        พร้อมเริ่มสอบ!
+                    </span>
+                    <span id="statusTag" class="hidden px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs sm:text-sm font-medium">
+                        กำลังสุ่ม...
+                    </span>
+                </div>
+
+                <!-- Optional Countdown Timer Widget -->
+                <div class="flex items-center gap-2">
+                    <div id="timerDisplay" class="hidden px-4 py-1.5 rounded-2xl bg-slate-900 text-white font-en font-bold text-lg sm:text-xl flex items-center gap-2 shadow-inner">
+                        <i class="fa-regular fa-clock text-amber-400"></i>
+                        <span id="timerSeconds">15</span>s
+                    </div>
+                    <button id="startTimerBtn" onclick="startTimer(15)" class="px-3.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-stopwatch"></i>
+                        <span>จับเวลา 15 วิ</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sentence Prompt Area (Large Classroom Projection Text) -->
+            <div id="sentenceArea" class="min-h-[190px] sm:min-h-[230px] flex flex-col items-center justify-center text-center my-2">
+                <!-- Initial Welcome State -->
+                <div id="welcomeState" class="space-y-3">
+                    <div class="w-16 h-16 mx-auto rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-3xl mb-2">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-800">กดปุ่ม "สุ่มโจทย์" เพื่อเริ่มทดสอบนักเรียน</h2>
+                    <p class="text-slate-500 text-base sm:text-lg max-w-xl mx-auto">
+                        ให้นักเรียนเติม <span class="font-semibold text-blue-600">ประธาน (Subject)</span> และเลือก <span class="font-semibold text-emerald-600">must</span> หรือ <span class="font-semibold text-rose-600">mustn't</span> ให้ถูกต้องตามความหมายของประโยค
+                    </p>
+                </div>
+
+                <!-- Active Question Display -->
+                <div id="questionState" class="hidden w-full">
+                    <div class="font-en text-2xl sm:text-4xl md:text-[2.65rem] font-bold text-slate-800 leading-relaxed sm:leading-[1.65] tracking-tight">
+                        <span id="slotSubject" class="blank-slot mx-1 my-1 text-xl sm:text-3xl">________</span>
+                        <span id="slotModal" class="blank-slot mx-1 my-1 text-xl sm:text-3xl">________</span>
+                        <span id="predicateText" class="text-slate-900 ml-1">raise your hand before speaking.</span>
+                    </div>
+
+                    <!-- Helper Hint Labels underneath blanks -->
+                    <div id="hintLabels" class="mt-5 flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm text-slate-400 font-medium">
+                        <span class="bg-slate-100 px-3 py-1 rounded-lg"><i class="fa-solid fa-user text-blue-500 mr-1"></i> ช่องที่ 1: ประธาน (Subject)</span>
+                        <span class="bg-slate-100 px-3 py-1 rounded-lg"><i class="fa-solid fa-scale-balanced text-indigo-500 mr-1"></i> ช่องที่ 2: must / mustn't</span>
+                    </div>
+
+                    <!-- Teacher Answer Note Box (Appears on Reveal) -->
+                    <div id="answerNoteBox" class="hidden mt-6 p-4 rounded-2xl bg-slate-50 border border-slate-200 max-w-2xl mx-auto text-left sm:text-center animate-pop">
+                        <p class="text-xs uppercase tracking-wider font-bold text-slate-400 mb-1">แนวคำตอบที่ถูกต้อง (Suggested Answer)</p>
+                        <p id="fullAnswerText" class="font-en text-lg sm:text-2xl font-bold text-slate-800"></p>
+                        <p id="thaiTranslationText" class="text-sm sm:text-base text-slate-600 mt-1"></p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Primary Action Buttons Row -->
+        <div class="w-full mt-6 sm:mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-5">
+            
+            <!-- Spin / Random Button -->
+            <button id="spinBtn" onclick="spinQuestion()" style="--shadow-color: #3730a3;"
+                class="btn-3d bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-lg sm:text-2xl px-8 sm:px-10 py-4 sm:py-5 rounded-2xl flex items-center gap-3">
+                <i id="spinIcon" class="fa-solid fa-shuffle"></i>
+                <span id="spinBtnText">สุ่มโจทย์ (Random)</span>
+            </button>
+
+            <!-- Show Answer Button -->
+            <button id="revealBtn" onclick="revealAnswer()" disabled style="--shadow-color: #b45309;"
+                class="btn-3d bg-amber-500 hover:bg-amber-400 text-white font-bold text-lg sm:text-xl px-6 sm:px-8 py-4 sm:py-5 rounded-2xl flex items-center gap-2.5">
+                <i class="fa-solid fa-eye"></i>
+                <span>ดูเฉลย</span>
+            </button>
+
+            <!-- Celebrate / Correct Button -->
+            <button id="correctBtn" onclick="celebrateCorrect()" disabled style="--shadow-color: #047857;"
+                class="btn-3d bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-lg sm:text-xl px-6 sm:px-8 py-4 sm:py-5 rounded-2xl flex items-center gap-2.5">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>ตอบถูก!</span>
+            </button>
+
+        </div>
+
+        <!-- Secondary Reset Link -->
+        <div class="mt-5 flex items-center gap-4 text-sm text-slate-500">
+            <button onclick="confirmResetAll()" class="hover:text-rose-600 underline underline-offset-4 flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span>รีเซ็ตเริ่มใหม่ทั้งหมด (Reset 25 ข้อ)</span>
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Modal: All 25 Questions Checklist -->
+    <div id="listModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden animate-pop">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-indigo-50/60">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800">รายการโจทย์ทั้งหมด 25 ข้อ</h3>
+                    <p class="text-xs text-slate-500">คลิกที่ข้อเพื่อเลือกแสดงบนหน้าจอ หรือติ๊กสถานะว่าใช้สอบไปแล้ว</p>
+                </div>
+                <button onclick="closeListModal()" class="w-9 h-9 rounded-full bg-white text-slate-500 hover:text-slate-800 flex items-center justify-center shadow-sm">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <div id="questionListContainer" class="p-4 sm:p-6 overflow-y-auto space-y-2.5 flex-1">
+                <!-- Populated dynamically via JS -->
+            </div>
+
+            <div class="px-6 py-3.5 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+                <button onclick="resetAllQuestions(); renderQuestionList();" class="text-sm font-semibold text-rose-600 hover:text-rose-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-left"></i> ล้างประวัติการสุ่มทั้งหมด
+                </button>
+                <button onclick="closeListModal()" class="px-5 py-2 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700">
+                    ปิดหน้าต่าง
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Toast / Message Box (Replaces alert/confirm) -->
+    <div id="toastBox" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 text-sm font-medium">
+            <i id="toastIcon" class="fa-solid fa-circle-info text-indigo-400 text-lg"></i>
+            <span id="toastMessage">ข้อความแจ้งเตือน</span>
+        </div>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-6 text-center animate-pop">
+            <div class="w-14 h-14 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-2xl mx-auto mb-4">
+                <i class="fa-solid fa-rotate-left"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-1">รีเซ็ตโจทย์ทั้งหมด?</h3>
+            <p class="text-sm text-slate-500 mb-6">ระบบจะคืนค่าโจทย์ทั้ง 25 ข้อให้กลับมาสุ่มได้ใหม่อีกครั้ง</p>
+            <div class="flex items-center justify-center gap-3">
+                <button onclick="closeConfirmModal()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50">
+                    ยกเลิก
+                </button>
+                <button onclick="executeReset()" class="flex-1 py-2.5 rounded-xl bg-rose-600 text-white font-semibold hover:bg-rose-700">
+                    ยืนยันรีเซ็ต
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. DATASET: ALL 25 SENTENCES
+        // ==========================================
+        const questionsData = [
+            {
+                id: 1,
+                predicate: "raise your hand before speaking.",
+                subjectHint: "You",
+                modal: "must",
+                fullAnswer: "You must raise your hand before speaking.",
+                thai: "คุณต้องยกมือก่อนพูด"
+            },
+            {
+                id: 2,
+                predicate: "use your phone during class.",
+                subjectHint: "You",
+                modal: "mustn't",
+                fullAnswer: "You mustn't use your phone during class.",
+                thai: "คุณห้ามใช้โทรศัพท์ระหว่างเรียน"
+            },
+            {
+                id: 3,
+                predicate: "submit the homework on time.",
+                subjectHint: "Students / You",
+                modal: "must",
+                fullAnswer: "Students / You / We must submit the homework on time.",
+                thai: "นักเรียน/คุณต้องส่งการบ้านให้ตรงเวลา"
+            },
+            {
+                id: 4,
+                predicate: "run in the hallway.",
+                subjectHint: "Students / You",
+                modal: "mustn't",
+                fullAnswer: "Students / You / We mustn't run in the hallway.",
+                thai: "นักเรียน/คุณห้ามวิ่งในโถงทางเดิน"
+            },
+            {
+                id: 5,
+                predicate: "listen to the teacher carefully.",
+                subjectHint: "Students / You",
+                modal: "must",
+                fullAnswer: "Students / You / We must listen to the teacher carefully.",
+                thai: "นักเรียน/คุณต้องตั้งใจฟังคุณครู"
+            },
+            {
+                id: 6,
+                predicate: "wear a helmet when riding a bike.",
+                subjectHint: "You / Everyone",
+                modal: "must",
+                fullAnswer: "You / Everyone must wear a helmet when riding a bike.",
+                thai: "คุณ/ทุกคนต้องสวมหมวกกันน็อกเมื่อขี่จักรยาน"
+            },
+            {
+                id: 7,
+                predicate: "feed the animals at the zoo.",
+                subjectHint: "You / Visitors",
+                modal: "mustn't",
+                fullAnswer: "You / Visitors mustn't feed the animals at the zoo.",
+                thai: "คุณ/ผู้เข้าชมห้ามให้อาหารสัตว์ในสวนสัตว์"
+            },
+            {
+                id: 8,
+                predicate: "wash your hands before eating.",
+                subjectHint: "You",
+                modal: "must",
+                fullAnswer: "You must wash your hands before eating.",
+                thai: "คุณต้องล้างมือก่อนรับประทานอาหาร"
+            },
+            {
+                id: 9,
+                predicate: "litter in the park.",
+                subjectHint: "You / People",
+                modal: "mustn't",
+                fullAnswer: "You / Everyone / People mustn't litter in the park.",
+                thai: "คุณ/ผู้คนห้ามทิ้งขยะในสวนสาธารณะ"
+            },
+            {
+                id: 10,
+                predicate: "look both ways before crossing the street.",
+                subjectHint: "You",
+                modal: "must",
+                fullAnswer: "You / Pedestrians must look both ways before crossing the street.",
+                thai: "คุณ/คนเดินเท้าต้องมองซ้ายขวาให้ดีก่อนข้ามถนน"
+            },
+            {
+                id: 11,
+                predicate: "wear the school uniform on Mondays.",
+                subjectHint: "Students / You",
+                modal: "must",
+                fullAnswer: "Students / You / We must wear the school uniform on Mondays.",
+                thai: "นักเรียน/คุณต้องสวมชุดนักเรียนในวันจันทร์"
+            },
+            {
+                id: 12,
+                predicate: "be late for school in the morning.",
+                subjectHint: "Students / You",
+                modal: "mustn't",
+                fullAnswer: "Students / You / We mustn't be late for school in the morning.",
+                thai: "นักเรียน/คุณห้ามมาโรงเรียนสายในตอนเช้า"
+            },
+            {
+                id: 13,
+                predicate: "bring textbooks to every class.",
+                subjectHint: "Students / You",
+                modal: "must",
+                fullAnswer: "Students / You / We must bring textbooks to every class.",
+                thai: "นักเรียน/คุณต้องนำหนังสือเรียนมาทุกคาบ"
+            },
+            {
+                id: 14,
+                predicate: "copy your friend's homework.",
+                subjectHint: "You",
+                modal: "mustn't",
+                fullAnswer: "You mustn't copy your friend's homework.",
+                thai: "คุณห้ามลอกการบ้านของเพื่อน"
+            },
+            {
+                id: 15,
+                predicate: "keep the classroom clean.",
+                subjectHint: "Students / We",
+                modal: "must",
+                fullAnswer: "Students / You / We must keep the classroom clean.",
+                thai: "นักเรียน/พวกเราต้องรักษาความสะอาดของห้องเรียน"
+            },
+            {
+                id: 16,
+                predicate: "eat snacks during the lesson.",
+                subjectHint: "Students / You",
+                modal: "mustn't",
+                fullAnswer: "Students / You / We mustn't eat snacks during the lesson.",
+                thai: "นักเรียน/คุณห้ามกินขนมระหว่างเรียน"
+            },
+            {
+                id: 17,
+                predicate: "turn off your mobile phone in the library.",
+                subjectHint: "You",
+                modal: "must",
+                fullAnswer: "You must turn off your mobile phone in the library.",
+                thai: "คุณต้องปิดโทรศัพท์มือถือในห้องสมุด"
+            },
+            {
+                id: 18,
+                predicate: "sleep during the English class.",
+                subjectHint: "Students / You",
+                modal: "mustn't",
+                fullAnswer: "Students / You / We mustn't sleep during the English class.",
+                thai: "นักเรียน/คุณห้ามนอนหลับในคาบเรียนภาษาอังกฤษ"
+            },
+            {
+                id: 19,
+                predicate: "help your classmates with group work.",
+                subjectHint: "You",
+                modal: "must",
+                fullAnswer: "You must help your classmates with group work.",
+                thai: "คุณต้องช่วยเหลือเพื่อนร่วมชั้นในการทำงานกลุ่ม"
+            },
+            {
+                id: 20,
+                predicate: "cheat on the final exam.",
+                subjectHint: "Students / You",
+                modal: "mustn't",
+                fullAnswer: "Students / You / We mustn't cheat on the final exam.",
+                thai: "นักเรียน/คุณห้ามทุจริตในการสอบปลายภาค"
+            },
+            {
+                id: 21,
+                predicate: "return books to the school library on time.",
+                subjectHint: "Students / You",
+                modal: "must",
+                fullAnswer: "Students / You / We must return books to the school library on time.",
+                thai: "นักเรียน/คุณต้องคืนหนังสือห้องสมุดโรงเรียนให้ตรงเวลา"
+            },
+            {
+                id: 22,
+                predicate: "write on the school desks or walls.",
+                subjectHint: "Students / You",
+                modal: "mustn't",
+                fullAnswer: "Students / You / We mustn't write on the school desks or walls.",
+                thai: "นักเรียน/คุณห้ามขีดเขียนบนโต๊ะเรียนหรือผนังโรงเรียน"
+            },
+            {
+                id: 23,
+                predicate: "speak English in the English activity room.",
+                subjectHint: "Students / We",
+                modal: "must",
+                fullAnswer: "Students / You / We must speak English in the English activity room.",
+                thai: "นักเรียน/พวกเราต้องพูดภาษาอังกฤษในห้องกิจกรรมภาษาอังกฤษ"
+            },
+            {
+                id: 24,
+                predicate: "run down the stairs.",
+                subjectHint: "Students / You",
+                modal: "mustn't",
+                fullAnswer: "Students / You / We mustn't run down the stairs.",
+                thai: "นักเรียน/คุณห้ามวิ่งลงบันได"
+            },
+            {
+                id: 25,
+                predicate: "pay attention to the teacher's explanation.",
+                subjectHint: "You",
+                modal: "must",
+                fullAnswer: "You must pay attention to the teacher's explanation.",
+                thai: "คุณต้องตั้งใจฟังคำอธิบายของคุณครู"
+            }
+        ];
+
+        // ==========================================
+        // 2. STATE MANAGEMENT
+        // ==========================================
+        let usedIds = new Set();
+        let currentQuestion = null;
+        let isSpinning = false;
+        let isAnswerRevealed = false;
+        let allowRepeats = false;
+        let soundEnabled = true;
+        let timerInterval = null;
+        let timeLeft = 15;
+
+        // ==========================================
+        // 3. WEB AUDIO API SYNTHESIZER (NO EXTERNAL FILES)
+        // ==========================================
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playTickSound(pitch = 520) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(pitch, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.06);
+            } catch (e) {}
+        }
+
+        function playLandSound() {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.07);
+                    gain.gain.setValueAtTime(0.12, audioCtx.currentTime + idx * 0.07);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.07 + 0.25);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(audioCtx.currentTime + idx * 0.07);
+                    osc.stop(audioCtx.currentTime + idx * 0.07 + 0.25);
+                });
+            } catch (e) {}
+        }
+
+        function playRevealSound() {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.18);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.2);
+            } catch (e) {}
+        }
+
+        function playSuccessFanfare() {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5 E5 G5 C6
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.09);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime + idx * 0.09);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.09 + 0.35);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(audioCtx.currentTime + idx * 0.09);
+                    osc.stop(audioCtx.currentTime + idx * 0.09 + 0.35);
+                });
+            } catch (e) {}
+        }
+
+        function playTimeUpSound() {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(140, audioCtx.currentTime + 0.4);
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.45);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.45);
+            } catch (e) {}
+        }
+
+        // ==========================================
+        // 4. CORE GAME LOGIC
+        // ==========================================
+        function updateCounterUI() {
+            const remaining = questionsData.length - usedIds.size;
+            document.getElementById('remainingCount').textContent = remaining;
+            
+            const badge = document.getElementById('counterBadge');
+            if (remaining === 0 && !allowRepeats) {
+                badge.classList.add('border-rose-300', 'bg-rose-50');
+            } else {
+                badge.classList.remove('border-rose-300', 'bg-rose-50');
+            }
+        }
+
+        function getAvailablePool() {
+            if (allowRepeats) {
+                return questionsData;
+            }
+            return questionsData.filter(q => !usedIds.has(q.id));
+        }
+
+        function spinQuestion() {
+            if (isSpinning) return;
+
+            const pool = getAvailablePool();
+            if (pool.length === 0) {
+                showToast("สุ่มครบทั้ง 25 ข้อแล้ว! กดปุ่มรีเซ็ตเพื่อเริ่มใหม่", "fa-circle-exclamation text-amber-400");
+                confirmResetAll();
+                return;
+            }
+
+            stopTimer();
+            isSpinning = true;
+            isAnswerRevealed = false;
+
+            // Switch UI from welcome to active question
+            document.getElementById('welcomeState').classList.add('hidden');
+            document.getElementById('questionState').classList.remove('hidden');
+            document.getElementById('statusTag').classList.remove('hidden');
+            document.getElementById('answerNoteBox').classList.add('hidden');
+            document.getElementById('hintLabels').classList.remove('hidden');
+
+            // Reset slots visual
+            resetBlankSlots();
+
+            // Disable action buttons while spinning
+            document.getElementById('spinBtn').disabled = true;
+            document.getElementById('revealBtn').disabled = true;
+            document.getElementById('correctBtn').disabled = true;
+            document.getElementById('spinIcon').classList.add('fa-spin');
+
+            // Pick final target question now
+            const targetQuestion = pool[Math.floor(Math.random() * pool.length)];
+
+            // Slot machine rapid cycle animation
+            let steps = 0;
+            const totalSteps = 18;
+            let delay = 45;
+
+            function cycleStep() {
+                // Show random visual preview during spin
+                const randomPreview = questionsData[Math.floor(Math.random() * questionsData.length)];
+                document.getElementById('qNumberBadge').textContent = `ข้อที่ #${randomPreview.id}`;
+                document.getElementById('predicateText').textContent = randomPreview.predicate;
+                
+                playTickSound(400 + steps * 20);
+                steps++;
+
+                if (steps < totalSteps) {
+                    // Gradually slow down
+                    if (steps > 11) delay += 28;
+                    setTimeout(cycleStep, delay);
+                } else {
+                    finalizeSelection(targetQuestion);
+                }
+            }
+
+            cycleStep();
+        }
+
+        function finalizeSelection(question) {
+            currentQuestion = question;
+            if (!allowRepeats) {
+                usedIds.add(question.id);
+            }
+            updateCounterUI();
+
+            // Display final selected question
+            document.getElementById('qNumberBadge').textContent = `ข้อที่ #${question.id}`;
+            document.getElementById('predicateText').textContent = question.predicate;
+            document.getElementById('statusTag').classList.add('hidden');
+
+            // Pop animation on card
+            const qState = document.getElementById('questionState');
+            qState.classList.remove('animate-pop');
+            void qState.offsetWidth; // trigger reflow
+            qState.classList.add('animate-pop');
+
+            playLandSound();
+
+            // Re-enable buttons
+            isSpinning = false;
+            document.getElementById('spinBtn').disabled = false;
+            document.getElementById('revealBtn').disabled = false;
+            document.getElementById('correctBtn').disabled = false;
+            document.getElementById('spinIcon').classList.remove('fa-spin');
+        }
+
+        function resetBlankSlots() {
+            const subSlot = document.getElementById('slotSubject');
+            const modSlot = document.getElementById('slotModal');
+
+            subSlot.textContent = "________";
+            subSlot.className = "blank-slot mx-1 my-1 text-xl sm:text-3xl";
+
+            modSlot.textContent = "________";
+            modSlot.className = "blank-slot mx-1 my-1 text-xl sm:text-3xl";
+        }
+
+        function revealAnswer() {
+            if (!currentQuestion || isSpinning) return;
+            isAnswerRevealed = true;
+            stopTimer();
+            playRevealSound();
+
+            const subSlot = document.getElementById('slotSubject');
+            const modSlot = document.getElementById('slotModal');
+
+            // Fill Subject Slot
+            subSlot.textContent = currentQuestion.subjectHint;
+            subSlot.classList.add('revealed-subject');
+
+            // Fill Modal Slot with color coding (Green for must, Red/Rose for mustn't)
+            modSlot.textContent = currentQuestion.modal;
+            if (currentQuestion.modal === "must") {
+                modSlot.classList.add('revealed-must');
+            } else {
+                modSlot.classList.add('revealed-mustnt');
+            }
+
+            // Show full answer & Thai translation box
+            document.getElementById('hintLabels').classList.add('hidden');
+            document.getElementById('fullAnswerText').textContent = currentQuestion.fullAnswer;
+            document.getElementById('thaiTranslationText').textContent = `คำแปล: "${currentQuestion.thai}"`;
+            document.getElementById('answerNoteBox').classList.remove('hidden');
+        }
+
+        function celebrateCorrect() {
+            if (!currentQuestion || isSpinning) return;
+            
+            // Automatically reveal answer if not yet shown
+            if (!isAnswerRevealed) {
+                revealAnswer();
+            }
+
+            playSuccessFanfare();
+
+            // Fire confetti burst
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 75,
+                    spread: 70,
+                    origin: { y: 0.65 }
+                });
+            }
+
+            showToast("ยอดเยี่ยม! ตอบถูกต้องครับ 🎉", "fa-star text-amber-400");
+        }
+
+        // ==========================================
+        // 5. TIMER LOGIC
+        // ==========================================
+        function startTimer(seconds = 15) {
+            stopTimer();
+            timeLeft = seconds;
+            const display = document.getElementById('timerDisplay');
+            const secEl = document.getElementById('timerSeconds');
+            
+            display.classList.remove('hidden', 'bg-rose-600', 'timer-urgent');
+            display.classList.add('bg-slate-900');
+            secEl.textContent = timeLeft;
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                secEl.textContent = timeLeft;
+
+                if (timeLeft <= 5 && timeLeft > 0) {
+                    display.classList.remove('bg-slate-900');
+                    display.classList.add('bg-rose-600', 'timer-urgent');
+                    playTickSound(750);
+                }
+
+                if (timeLeft <= 0) {
+                    stopTimer();
+                    display.classList.remove('hidden');
+                    display.classList.add('bg-rose-600');
+                    secEl.textContent = "0";
+                    playTimeUpSound();
+                    showToast("หมดเวลาแล้ว! (Time's up!)", "fa-hourglass-end text-rose-400");
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            const display = document.getElementById('timerDisplay');
+            display.classList.add('hidden');
+            display.classList.remove('timer-urgent');
+        }
+
+        // ==========================================
+        // 6. SETTINGS, LIST MODAL & CONTROLS
+        // ==========================================
+        function toggleRepeatMode() {
+            allowRepeats = !allowRepeats;
+            const icon = document.getElementById('repeatIcon');
+            const text = document.getElementById('repeatText');
+
+            if (allowRepeats) {
+                icon.className = "fa-solid fa-repeat text-amber-500";
+                text.textContent = "สุ่มซ้ำข้อเดิมได้";
+                showToast("เปลี่ยนเป็นโหมด: สุ่มซ้ำข้อเดิมได้", "fa-repeat text-amber-400");
+            } else {
+                icon.className = "fa-solid fa-ban text-emerald-600";
+                text.textContent = "ไม่สุ่มซ้ำข้อเดิม";
+                showToast("เปลี่ยนเป็นโหมด: สอบทีละคนไม่ซ้ำข้อ", "fa-ban text-emerald-400");
+            }
+            updateCounterUI();
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('soundIcon');
+            if (soundEnabled) {
+                icon.className = "fa-solid fa-volume-high text-indigo-600";
+                playTickSound(600);
+            } else {
+                icon.className = "fa-solid fa-volume-xmark text-slate-400";
+            }
+        }
+
+        function openListModal() {
+            renderQuestionList();
+            const modal = document.getElementById('listModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeListModal() {
+            const modal = document.getElementById('listModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function renderQuestionList() {
+            const container = document.getElementById('questionListContainer');
+            container.innerHTML = '';
+
+            questionsData.forEach(q => {
+                const isUsed = usedIds.has(q.id);
+                const row = document.createElement('div');
+                row.className = `p-3.5 rounded-2xl border flex items-center justify-between gap-3 transition ${
+                    isUsed ? 'bg-slate-50 border-slate-200 opacity-65' : 'bg-white border-indigo-100 hover:border-indigo-300'
+                }`;
+
+                row.innerHTML = `
+                    <div class="flex items-start gap-3 flex-1 cursor-pointer" onclick="selectSpecificQuestion(${q.id})">
+                        <span class="w-8 h-8 rounded-xl ${isUsed ? 'bg-slate-200 text-slate-600' : 'bg-indigo-100 text-indigo-700'} font-bold text-sm flex items-center justify-center shrink-0 mt-0.5">
+                            ${q.id}
+                        </span>
+                        <div>
+                            <p class="font-en font-semibold text-slate-800 text-sm sm:text-base">
+                                ________ ________ ${q.predicate}
+                            </p>
+                            <p class="text-xs text-slate-500 mt-0.5">
+                                เฉลย: <span class="font-en font-semibold ${q.modal === 'must' ? 'text-emerald-600' : 'text-rose-600'}">${q.fullAnswer}</span>
+                            </p>
+                        </div>
+                    </div>
+                    <button onclick="toggleUsedStatus(${q.id})" title="สลับสถานะใช้แล้ว/ยังไม่ใช้"
+                        class="px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 border transition ${
+                            isUsed 
+                            ? 'bg-slate-200 text-slate-700 border-slate-300 hover:bg-slate-300' 
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+                        }">
+                        ${isUsed ? '<i class="fa-solid fa-check mr-1"></i>ออกสอบแล้ว' : 'ยังไม่ใช้'}
+                    </button>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function toggleUsedStatus(id) {
+            if (usedIds.has(id)) {
+                usedIds.delete(id);
+            } else {
+                usedIds.add(id);
+            }
+            updateCounterUI();
+            renderQuestionList();
+        }
+
+        function selectSpecificQuestion(id) {
+            const q = questionsData.find(item => item.id === id);
+            if (!q) return;
+            closeListModal();
+            stopTimer();
+            isAnswerRevealed = false;
+            document.getElementById('welcomeState').classList.add('hidden');
+            document.getElementById('questionState').classList.remove('hidden');
+            document.getElementById('answerNoteBox').classList.add('hidden');
+            document.getElementById('hintLabels').classList.remove('hidden');
+            resetBlankSlots();
+            finalizeSelection(q);
+        }
+
+        function confirmResetAll() {
+            const modal = document.getElementById('confirmModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function executeReset() {
+            closeConfirmModal();
+            resetAllQuestions();
+            showToast("รีเซ็ตโจทย์ทั้ง 25 ข้อเรียบร้อยแล้ว!", "fa-rotate-left text-emerald-400");
+        }
+
+        function resetAllQuestions() {
+            usedIds.clear();
+            currentQuestion = null;
+            isAnswerRevealed = false;
+            stopTimer();
+            updateCounterUI();
+
+            document.getElementById('qNumberBadge').textContent = "พร้อมเริ่มสอบ!";
+            document.getElementById('welcomeState').classList.remove('hidden');
+            document.getElementById('questionState').classList.add('hidden');
+            document.getElementById('revealBtn').disabled = true;
+            document.getElementById('correctBtn').disabled = true;
+        }
+
+        // Toast Helper
+        let toastTimeout = null;
+        function showToast(msg, iconClasses = "fa-circle-info text-indigo-400") {
+            const box = document.getElementById('toastBox');
+            document.getElementById('toastMessage').textContent = msg;
+            document.getElementById('toastIcon').className = `fa-solid ${iconClasses} text-lg`;
+
+            box.classList.remove('translate-y-24', 'opacity-0');
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                box.classList.add('translate-y-24', 'opacity-0');
+            }, 2800);
+        }
+
+        // Keyboard Shortcuts for Teacher Convenience (Space = Spin, Enter = Reveal)
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('listModal').classList.contains('flex')) return;
+            if (e.code === 'Space') {
+                e.preventDefault();
+                spinQuestion();
+            } else if (e.code === 'Enter' && currentQuestion && !isSpinning) {
+                e.preventDefault();
+                revealAnswer();
+            }
+        });
+    </script>
+</body>
+</html>
