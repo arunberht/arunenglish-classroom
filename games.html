@@ -4,53 +4,245 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>English Games | Jomjam's Classroom</title>
+<title>English Games | The Enchanted Academy</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
+:root {
+  --purple: #60427e;
+  --plum: #38244f;
+  --gold: #d8b875;
+  --cream: #fffaf2;
+  --pink: #f5dce9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
-  font-family: Arial, sans-serif;
-  background: #f7f8fc;
-  color: #263449;
-  padding: 25px;
-  max-width: 750px;
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  color: var(--plum);
+  background:
+    linear-gradient(rgba(43,25,65,.48), rgba(65,37,83,.58)),
+    url('enchanted-library.png') center center / cover fixed;
+  padding: 35px 20px 60px;
+}
+
+.container {
+  max-width: 950px;
   margin: auto;
 }
-h1 { color: #e87935; }
+
+.back {
+  display: inline-block;
+  color: #fff4d9;
+  text-decoration: none;
+  font-size: 14px;
+  margin-bottom: 30px;
+  border-bottom: 1px solid var(--gold);
+  padding-bottom: 5px;
+}
+
+.back:hover {
+  color: var(--gold);
+}
+
+.hero {
+  text-align: center;
+  color: white;
+  padding: 25px 15px 38px;
+}
+
+.eyebrow {
+  color: #f8dfac;
+  letter-spacing: 5px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(42px, 8vw, 72px);
+  line-height: 1;
+  margin: 18px 0 12px;
+  color: #fff2d9;
+  text-shadow: 0 3px 20px #2d173e;
+}
+
+.subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 23px;
+  color: #f7e9ff;
+}
+
+.magic-line {
+  color: #f8d995;
+  font-size: 20px;
+  letter-spacing: 10px;
+  margin-top: 25px;
+  animation: sparkle 3s ease-in-out infinite alternate;
+}
+
+@keyframes sparkle {
+  from { opacity: .45; }
+  to {
+    opacity: 1;
+    text-shadow: 0 0 18px #ffe5a5;
+  }
+}
+
+.games {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 22px;
+}
+
 .game {
   display: block;
-  background: white;
-  padding: 22px;
-  margin: 15px 0;
-  border-radius: 15px;
+  position: relative;
+  overflow: hidden;
+  background: rgba(255,250,242,.96);
+  border: 1px solid var(--gold);
+  border-radius: 22px;
+  padding: 30px 24px;
+  min-height: 225px;
   text-decoration: none;
-  color: #263449;
-  box-shadow: 0 3px 12px #0000000d;
+  color: var(--plum);
+  box-shadow: 0 10px 30px rgba(22,10,35,.25);
+  transition: transform .3s, box-shadow .3s;
+  animation: float 4s ease-in-out infinite;
 }
-.game h2 { margin: 5px 0; }
-.game p { color: #687386; }
-.back { color: #3977ce; }
+
+.game:nth-child(2) {
+  animation-delay: .5s;
+}
+
+.game:nth-child(3) {
+  animation-delay: 1s;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.game:hover {
+  transform: translateY(-10px) scale(1.025);
+  box-shadow: 0 15px 35px rgba(216,184,117,.4);
+}
+
+.game::after {
+  content: "✧";
+  position: absolute;
+  right: 18px;
+  bottom: 10px;
+  color: var(--gold);
+  font-size: 30px;
+}
+
+.game-icon {
+  font-size: 42px;
+  margin-bottom: 12px;
+}
+
+.game h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 29px;
+  margin: 5px 0 8px;
+  color: var(--purple);
+}
+
+.game p {
+  color: #76677d;
+  font-size: 13px;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.play {
+  display: inline-block;
+  background: linear-gradient(135deg, #79569a, #50336e);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.footer {
+  text-align: center;
+  color: #f8e9d4;
+  margin-top: 45px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 22px 16px 45px;
+    background-attachment: scroll;
+  }
+
+  .hero {
+    padding-top: 15px;
+  }
+
+  .games {
+    grid-template-columns: 1fr;
+  }
+
+  .game {
+    min-height: 190px;
+  }
+}
 </style>
 </head>
+
 <body>
+<div class="container">
 
-<a class="back" href="index.html">← Back to Home</a>
+  <a class="back" href="index.html">← Back to Home</a>
 
-<h1>🎮 English Games</h1>
-<p>Choose your game and start learning!</p>
+  <section class="hero">
+    <div class="eyebrow">WELCOME TO THE MAGIC LIBRARY</div>
+    <h1>English Games</h1>
+    <div class="subtitle">Choose your game and let the magic begin.</div>
+    <div class="magic-line">✦ · ✧ · ✦ · ✧ · ✦</div>
+  </section>
 
-<a class="game" href="game/flashcard-unit-2.html">
-  <h2>🃏 Flashcard Unit 2</h2>
-  <p>Practice your vocabulary.</p>
-</a>
+  <section class="games">
 
-<a class="game" href="game/must-random.html">
-  <h2>🎲 Must Random</h2>
-  <p>Explore random topics.</p>
-</a>
+    <a class="game" href="game/flashcard-unit-2.html">
+      <div class="game-icon">🃏</div>
+      <h2>Flashcard Unit 2</h2>
+      <p>Discover new words and practice your vocabulary.</p>
+      <span class="play">PLAY GAME ✦</span>
+    </a>
 
-<a class="game" href="game/must-reading.html">
-  <h2>📖 Must Reading</h2>
-  <p>Improve your reading skills.</p>
-</a>
+    <a class="game" href="game/must-random.html">
+      <div class="game-icon">🎲</div>
+      <h2>Must Random</h2>
+      <p>Pick a random topic and challenge yourself.</p>
+      <span class="play">PLAY GAME ✦</span>
+    </a>
 
+    <a class="game" href="game/must-reading.html">
+      <div class="game-icon">📖</div>
+      <h2>Must Reading</h2>
+      <p>Explore stories and improve your reading skills.</p>
+      <span class="play">PLAY GAME ✦</span>
+    </a>
+
+  </section>
+
+  <div class="footer">
+    ✧ Every little lesson holds a little magic. ✧
+  </div>
+
+</div>
 </body>
 </html>
