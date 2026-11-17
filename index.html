@@ -2,207 +2,455 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ARUNSIRIKAN'S Classroom</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARUNSIRIKAN'S CLASSROOM</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<style>
+:root {
+  --violet: #6558E8;
+  --coral: #FF805E;
+  --lime: #D9F36A;
+  --sky: #B9E4FF;
+  --lavender: #DCD6FF;
+  --cream: #FFFEFA;
+  --ink: #25233A;
+}
 
-    body {
-      font-family: Arial, sans-serif;
-      background: #f7f8fc;
-      color: #263449;
-      line-height: 1.6;
-    }
+* {
+  box-sizing: border-box;
+}
 
-    header {
-      background: #17243b;
-      color: white;
-      padding: 45px 20px;
-      text-align: center;
-    }
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+}
 
-    header h1 {
-      font-size: 30px;
-      margin-bottom: 10px;
-    }
+/* NAVIGATION */
+nav {
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 7%;
+  background: white;
+}
 
-    header p {
-      color: #d5e2f1;
-    }
+.logo {
+  font-weight: 900;
+  font-size: 19px;
+  letter-spacing: -1px;
+}
 
-    nav {
-      background: white;
-      padding: 15px;
-      text-align: center;
-      border-bottom: 1px solid #e5e7eb;
-    }
+.logo span {
+  color: var(--violet);
+}
 
-    nav a {
-      color: #34445a;
-      text-decoration: none;
-      margin: 0 12px;
-      font-weight: bold;
-    }
+.links {
+  display: flex;
+  gap: 28px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
 
-    main {
-      max-width: 950px;
-      margin: 35px auto;
-      padding: 0 20px;
-    }
+.links a {
+  color: var(--ink);
+  text-decoration: none;
+}
 
-    .welcome {
-      background: white;
-      padding: 28px;
-      border-radius: 18px;
-      margin-bottom: 30px;
-      text-align: center;
-    }
+/* HERO */
+.hero {
+  margin: 28px auto 0;
+  width: 88%;
+  min-height: 390px;
+  border-radius: 28px;
+  background: var(--violet);
+  color: white;
+  padding: 62px 7%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
 
-    .welcome h2 {
-      color: #e87935;
-      margin-bottom: 10px;
-    }
+.hero-copy {
+  position: relative;
+  z-index: 2;
+  max-width: 650px;
+}
 
-    .section-title {
-      margin-bottom: 18px;
-    }
+.eyebrow {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--lime);
+  margin-bottom: 20px;
+}
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-    }
+h1 {
+  font-size: clamp(42px, 6vw, 76px);
+  line-height: .98;
+  letter-spacing: -3px;
+  margin: 0 0 20px;
+  font-weight: 950;
+}
 
-    .card {
-      padding: 25px;
-      border-radius: 16px;
-      text-decoration: none;
-      color: #263449;
-      transition: transform 0.2s;
-    }
+h1 em {
+  font-style: normal;
+  color: var(--lime);
+}
 
-    .card:hover {
-      transform: translateY(-4px);
-    }
+.hero p {
+  font-size: 17px;
+  line-height: 1.6;
+  color: #eeeaff;
+  max-width: 450px;
+}
 
-    .card h3 {
-      margin-bottom: 7px;
-    }
+.cta {
+  display: inline-block;
+  margin-top: 16px;
+  background: var(--lime);
+  color: var(--ink);
+  padding: 15px 23px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 900;
+}
 
-    .orange { background: #fff0e5; }
-    .blue { background: #eaf1ff; }
-    .purple { background: #f1ebff; }
-    .green { background: #e8f5ec; }
+.orbit {
+  position: absolute;
+  border: 2px solid rgba(255,255,255,.22);
+  border-radius: 50%;
+  width: 330px;
+  height: 330px;
+  right: 8%;
+  top: 34px;
+}
 
-    .emoji {
-      font-size: 32px;
-      margin-bottom: 8px;
-    }
+.orbit:before {
+  content: "✳";
+  position: absolute;
+  color: var(--lime);
+  font-size: 86px;
+  right: 18px;
+  top: 10px;
+}
 
-    footer {
-      margin-top: 45px;
-      padding: 25px;
-      text-align: center;
-      background: #17243b;
-      color: white;
-      font-size: 13px;
-    }
+.orbit:after {
+  content: "ENGLISH, BUT MAKE IT FUN";
+  position: absolute;
+  right: 15px;
+  bottom: 35px;
+  transform: rotate(-12deg);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: white;
+}
 
-    @media (max-width: 550px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
+.spark {
+  position: absolute;
+  font-size: 55px;
+  color: var(--coral);
+  right: 31%;
+  bottom: 35px;
+  transform: rotate(14deg);
+}
 
-      header h1 {
-        font-size: 25px;
-      }
+/* RESOURCE CARDS */
+.section {
+  width: 88%;
+  margin: 58px auto 70px;
+}
 
-      nav a {
-        display: inline-block;
-        margin: 5px 8px;
-      }
-    }
-  </style>
+.section-top {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+h2 {
+  font-size: clamp(30px, 4vw, 44px);
+  letter-spacing: -1.8px;
+  margin: 0;
+  font-weight: 950;
+}
+
+.section-top p {
+  margin: 0;
+  color: #77738a;
+  font-size: 14px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.card {
+  min-height: 220px;
+  border-radius: 22px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: transform .2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card .icon {
+  font-size: 38px;
+  margin-bottom: 28px;
+  display: block;
+}
+
+.card h3 {
+  font-size: 24px;
+  letter-spacing: -.7px;
+  margin: 0 0 7px;
+  font-weight: 950;
+}
+
+.card p {
+  font-size: 14px;
+  margin: 0;
+  color: #353248;
+}
+
+.card .arrow {
+  position: absolute;
+  right: 20px;
+  bottom: 18px;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.games {
+  background: var(--coral);
+}
+
+.worksheets {
+  background: var(--sky);
+}
+
+.quizzes {
+  background: var(--lime);
+}
+
+.vocab {
+  background: var(--lavender);
+}
+
+.soon {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  background: rgba(255,255,255,.55);
+  padding: 7px 10px;
+  border-radius: 99px;
+}
+
+/* FOOTER */
+footer {
+  background: #25233A;
+  color: white;
+  padding: 30px 7%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+footer span {
+  color: var(--lime);
+}
+
+/* MOBILE */
+@media(max-width:760px) {
+  nav {
+    padding: 0 6%;
+    height: 66px;
+  }
+
+  .links {
+    gap: 12px;
+    font-size: 10px;
+  }
+
+  .hero {
+    width: 90%;
+    padding: 45px 7%;
+    min-height: 390px;
+  }
+
+  .orbit {
+    right: -140px;
+    opacity: .6;
+  }
+
+  .section {
+    width: 90%;
+    margin-top: 45px;
+  }
+
+  .section-top {
+    display: block;
+  }
+
+  .section-top p {
+    margin-top: 8px;
+  }
+
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .card {
+    min-height: 190px;
+    padding: 19px;
+  }
+
+  .card h3 {
+    font-size: 21px;
+  }
+
+  footer {
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+}
+
+@media(max-width:390px) {
+  .links {
+    gap: 8px;
+    font-size: 9px;
+  }
+
+  .logo {
+    font-size: 16px;
+  }
+}
+</style>
 </head>
 
 <body>
 
-  <header>
-    <h1>ARUNSIRIKAN'S CLASSROOM</h1>
-    <p>Learn English • Explore • Practice • Have Fun</p>
-  </header>
+<nav>
+  <div class="logo">
+    ARUNSIRIKAN<span>✳</span>
+  </div>
 
-  <nav>
-    <a href="#home">Home</a>
-    <a href="#materials">Materials</a>
-    <a href="#about">About</a>
-  </nav>
+  <div class="links">
+    <a href="index.html">HOME</a>
+    <a href="games.html">GAMES</a>
+    <a href="worksheets.html">MATERIALS</a>
+    <a href="#about">ABOUT</a>
+  </div>
+</nav>
 
-  <main>
+<main>
 
-    <section class="welcome" id="home">
-      <h2>Welcome to My Classroom! ✨</h2>
-      <p>
-        A little space for learning English.
-        Let's learn something new together!
-      </p>
-    </section>
+  <section class="hero">
+    <div class="hero-copy">
 
-    <section id="materials">
-      <h2 class="section-title">📚 My Teaching Resources</h2>
-
-      <div class="grid">
-
-        
-<a href="games.html" class="card orange">
-  <div class="emoji">🎮</div>
-  <h3>English Games</h3>
-  <p>Explore and enjoy learning!</p>
-</a>
-
-        
-<a href="worksheets.html" class="card blue">
-  <div class="emoji">📚</div>
-  <h3>Worksheets</h3>
-  <p>Practice your English skills.</p>
-</a>
-
-        <a href="#quizzes" class="card purple">
-          <div class="emoji">📝</div>
-          <h3>Quizzes</h3>
-          <p>Test what you have learned.</p>
-        </a>
-
-        <a href="#vocabulary" class="card green">
-          <div class="emoji">🔤</div>
-          <h3>Vocabulary</h3>
-          <p>Build your English vocabulary.</p>
-        </a>
-
+      <div class="eyebrow">
+        WELCOME TO MY ENGLISH CLASSROOM ✦
       </div>
-    </section>
 
-    <section id="about" style="margin-top: 35px;">
-      <h2>About This Classroom</h2>
+      <h1>
+        LESS STUDY STRESS.<br>
+        <em>MORE ENGLISH FUN.</em>
+      </h1>
+
       <p>
-        Welcome to our English learning space!
-        Explore the materials and enjoy learning English.
+        Explore. Play. Practice.
+        Learn English your way!
       </p>
-    </section>
 
-  </main>
+      <a class="cta" href="games.html">
+        LET'S EXPLORE ↗
+      </a>
 
-  <footer>
-    <p>ARUNSIRIKAN'S CLASSROOM</p>
-    <p>MATTHAYOMWATBUENGTHONGLANG SCHOOL</p>
-    <p>Learn. Play. Grow. 💗</p>
-  </footer>
+    </div>
+
+    <div class="orbit"></div>
+    <div class="spark">✦</div>
+  </section>
+
+  <section class="section">
+
+    <div class="section-top">
+      <h2>Pick your vibe. ✌️</h2>
+      <p>A little practice. A lot more confidence.</p>
+    </div>
+
+    <div class="cards">
+
+      <a class="card games"
+         href="games.html"
+         style="color:inherit;text-decoration:none">
+
+        <span class="icon">🎮</span>
+        <h3>GAMES</h3>
+        <p>Play &amp; have fun!</p>
+        <span class="arrow">↗</span>
+
+      </a>
+
+      <a class="card worksheets"
+         href="worksheets.html"
+         style="color:inherit;text-decoration:none">
+
+        <span class="icon">📝</span>
+        <h3>WORKSHEETS</h3>
+        <p>Practice your skills!</p>
+        <span class="arrow">↗</span>
+
+      </a>
+
+      <div class="card quizzes">
+        <span class="icon">🏆</span>
+        <h3>QUIZZES</h3>
+        <p>Challenge yourself.</p>
+        <span class="soon">COMING SOON</span>
+      </div>
+
+      <div class="card vocab">
+        <span class="icon">💡</span>
+        <h3>VOCABULARY</h3>
+        <p>Build your word power.</p>
+        <span class="soon">COMING SOON</span>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer id="about">
+  <div>
+    LEARN YOUR WAY.
+    <span>BE YOURSELF.</span>
+  </div>
+
+  <div>
+    ARUNSIRIKAN'S CLASSROOM © 2026
+  </div>
+</footer>
 
 </body>
 </html>
