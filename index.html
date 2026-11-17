@@ -4,452 +4,429 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ARUNSIRIKAN'S CLASSROOM</title>
-
+<meta name="theme-color" content="#302044">
+<title>ARUNSIRIKAN'S CLASSROOM | The Enchanted English Academy</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap');
+
 :root {
-  --violet: #6558E8;
-  --coral: #FF805E;
-  --lime: #D9F36A;
-  --sky: #B9E4FF;
-  --lavender: #DCD6FF;
-  --cream: #FFFEFA;
-  --ink: #25233A;
+  --plum:#302044;
+  --purple:#60427e;
+  --lav:#d9c5ec;
+  --pink:#f5dce9;
+  --gold:#d8b875;
+  --cream:#fffaf4;
+  --ink:#382746;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
 
 body {
-  margin: 0;
-  background: var(--cream);
-  color: var(--ink);
-  font-family: Arial, Helvetica, sans-serif;
+  margin:0;
+  color:var(--ink);
+  background:#f9eff8;
+  font-family:Nunito,Arial,sans-serif;
 }
 
-/* NAVIGATION */
+a { color:inherit; }
+
+.topbar {
+  min-height:78px;
+  padding:14px 6%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  background:rgba(42,27,58,.97);
+  color:#fff7e9;
+  border-bottom:1px solid rgba(216,184,117,.7);
+}
+
+.brand {
+  font-family:'Cormorant Garamond',Georgia,serif;
+  font-size:clamp(20px,3vw,29px);
+  font-weight:700;
+  letter-spacing:1px;
+  white-space:nowrap;
+}
+
+.brand small {
+  display:block;
+  text-align:center;
+  font:10px Nunito,sans-serif;
+  letter-spacing:5px;
+  color:var(--gold);
+}
+
+.brand .crown {
+  color:var(--gold);
+  margin-right:8px;
+}
+
 nav {
-  min-height: 76px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 7%;
-  background: white;
+  display:flex;
+  gap:clamp(12px,3vw,34px);
+  align-items:center;
+  flex-wrap:wrap;
 }
 
-.logo {
-  font-weight: 900;
-  font-size: 19px;
-  letter-spacing: -1px;
+nav a {
+  text-decoration:none;
+  color:#fff8ee;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:1.3px;
 }
 
-.logo span {
-  color: var(--violet);
-}
+nav a:hover { color:#f2d59b; }
 
-.links {
-  display: flex;
-  gap: 28px;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 1px;
-}
-
-.links a {
-  color: var(--ink);
-  text-decoration: none;
-}
-
-/* HERO */
 .hero {
-  margin: 28px auto 0;
-  width: 88%;
-  min-height: 390px;
-  border-radius: 28px;
-  background: var(--violet);
-  color: white;
-  padding: 62px 7%;
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
+  min-height:600px;
+  position:relative;
+  isolation:isolate;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  padding:78px 22px 220px;
+  background:
+    linear-gradient(90deg,rgba(34,22,48,.64),rgba(57,35,76,.38),rgba(34,22,48,.22)),
+    url('enchanted-library.png') center 48%/cover no-repeat;
 }
 
-.hero-copy {
-  position: relative;
-  z-index: 2;
-  max-width: 650px;
+.hero:after {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  background:linear-gradient(
+    180deg,
+    rgba(35,22,48,.12),
+    rgba(44,27,60,.18) 60%,
+    #f9eff8 100%
+  );
 }
 
-.eyebrow {
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 2px;
-  color: var(--lime);
-  margin-bottom: 20px;
+.hero-content {
+  max-width:850px;
+  color:#fff9f0;
+  text-shadow:0 2px 18px rgba(25,12,40,.45);
+}
+
+.crown-mark {
+  font-size:42px;
+  color:#f1d18c;
+  margin-bottom:4px;
+}
+
+.kicker {
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:3px;
+  color:#ffe4a8;
+  text-transform:uppercase;
 }
 
 h1 {
-  font-size: clamp(42px, 6vw, 76px);
-  line-height: .98;
-  letter-spacing: -3px;
-  margin: 0 0 20px;
-  font-weight: 950;
+  font:600 clamp(42px,7vw,82px)/.92 'Cormorant Garamond',Georgia,serif;
+  letter-spacing:1px;
+  margin:18px 0;
+  color:#fff2d7;
 }
 
-h1 em {
-  font-style: normal;
-  color: var(--lime);
+.subtitle {
+  display:inline-block;
+  margin:4px 0 15px;
+  padding:9px 25px;
+  border:1px solid #e7c88c;
+  border-radius:50px;
+  background:rgba(255,237,222,.88);
+  color:#4b315f;
+  font:700 clamp(16px,2.4vw,22px) 'Cormorant Garamond',Georgia,serif;
+  text-shadow:none;
 }
 
 .hero p {
-  font-size: 17px;
-  line-height: 1.6;
-  color: #eeeaff;
-  max-width: 450px;
+  font:500 17px/1.6 'Cormorant Garamond',Georgia,serif;
+  margin:12px 0 22px;
 }
 
 .cta {
-  display: inline-block;
-  margin-top: 16px;
-  background: var(--lime);
-  color: var(--ink);
-  padding: 15px 23px;
-  border-radius: 999px;
-  text-decoration: none;
-  font-size: 12px;
-  font-weight: 900;
+  display:inline-block;
+  text-decoration:none;
+  padding:13px 30px;
+  border-radius:50px;
+  color:#fff8ef;
+  background:linear-gradient(135deg,#9b75b4,#63477e);
+  border:1px solid #f0d393;
+  box-shadow:0 5px 22px #2c1b4670;
+  font:800 12px Nunito,sans-serif;
+  letter-spacing:1px;
+  text-shadow:none;
 }
 
-.orbit {
-  position: absolute;
-  border: 2px solid rgba(255,255,255,.22);
-  border-radius: 50%;
-  width: 330px;
-  height: 330px;
-  right: 8%;
-  top: 34px;
+.cta:hover {
+  transform:translateY(-2px);
+  filter:brightness(1.08);
 }
 
-.orbit:before {
-  content: "✳";
-  position: absolute;
-  color: var(--lime);
-  font-size: 86px;
-  right: 18px;
-  top: 10px;
+.resources {
+  position:relative;
+  margin:-175px auto 0;
+  width:min(1120px,91%);
+  z-index:3;
+  padding-bottom:65px;
 }
 
-.orbit:after {
-  content: "ENGLISH, BUT MAKE IT FUN";
-  position: absolute;
-  right: 15px;
-  bottom: 35px;
-  transform: rotate(-12deg);
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 2px;
-  color: white;
+.section-heading {
+  text-align:center;
+  margin:0 0 24px;
+  color:#fff8ef;
+  text-shadow:0 2px 12px #37204b;
+  font:600 clamp(29px,4vw,43px) 'Cormorant Garamond',Georgia,serif;
 }
 
-.spark {
-  position: absolute;
-  font-size: 55px;
-  color: var(--coral);
-  right: 31%;
-  bottom: 35px;
-  transform: rotate(14deg);
-}
-
-/* RESOURCE CARDS */
-.section {
-  width: 88%;
-  margin: 58px auto 70px;
-}
-
-.section-top {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  margin-bottom: 24px;
-}
-
-h2 {
-  font-size: clamp(30px, 4vw, 44px);
-  letter-spacing: -1.8px;
-  margin: 0;
-  font-weight: 950;
-}
-
-.section-top p {
-  margin: 0;
-  color: #77738a;
-  font-size: 14px;
-}
+.section-heading span { color:#f4d797; }
 
 .cards {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
 }
 
 .card {
-  min-height: 220px;
-  border-radius: 22px;
-  padding: 24px;
-  position: relative;
-  overflow: hidden;
-  transition: transform .2s ease;
+  min-height:260px;
+  text-align:center;
+  text-decoration:none;
+  padding:25px 17px 22px;
+  background:linear-gradient(145deg,#fffdf9,#f8eaf2);
+  border:1px solid #d6b77d;
+  outline:1px solid rgba(255,255,255,.85);
+  outline-offset:-6px;
+  border-radius:24px;
+  box-shadow:0 12px 30px rgba(62,38,75,.18);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  transition:transform .2s,box-shadow .2s;
+  position:relative;
 }
+
+.card:before,.card:after {
+  content:"✦";
+  position:absolute;
+  color:#bd9654;
+  font-size:17px;
+}
+
+.card:before { top:12px;left:17px; }
+.card:after { bottom:12px;right:17px; }
 
 .card:hover {
-  transform: translateY(-5px);
+  transform:translateY(-7px);
+  box-shadow:0 18px 35px rgba(62,38,75,.25);
 }
 
-.card .icon {
-  font-size: 38px;
-  margin-bottom: 28px;
-  display: block;
+.card-icon {
+  font-size:43px;
+  margin-bottom:10px;
+  filter:drop-shadow(0 3px 3px #b89bc8);
 }
 
-.card h3 {
-  font-size: 24px;
-  letter-spacing: -.7px;
-  margin: 0 0 7px;
-  font-weight: 950;
+.card h2 {
+  font:700 29px 'Cormorant Garamond',Georgia,serif;
+  margin:3px 0 7px;
+  color:#49315d;
 }
 
 .card p {
-  font-size: 14px;
-  margin: 0;
-  color: #353248;
+  font-size:13px;
+  line-height:1.55;
+  margin:0 0 17px;
+  color:#66566d;
 }
 
-.card .arrow {
-  position: absolute;
-  right: 20px;
-  bottom: 18px;
-  font-size: 22px;
-  font-weight: 900;
+.card-button {
+  margin-top:auto;
+  background:#76568f;
+  color:white;
+  border-radius:30px;
+  padding:9px 18px;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.4px;
 }
 
-.games {
-  background: var(--coral);
+.card.soon .card-button {
+  background:#c7afd7;
+  color:#49315d;
 }
 
-.worksheets {
-  background: var(--sky);
-}
-
-.quizzes {
-  background: var(--lime);
-}
-
-.vocab {
-  background: var(--lavender);
-}
-
-.soon {
-  display: inline-block;
-  margin-top: 14px;
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 1px;
-  background: rgba(255,255,255,.55);
-  padding: 7px 10px;
-  border-radius: 99px;
-}
-
-/* FOOTER */
 footer {
-  background: #25233A;
-  color: white;
-  padding: 30px 7%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 1px;
+  text-align:center;
+  padding:24px 15px 35px;
+  color:#75588b;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:3px;
 }
 
-footer span {
-  color: var(--lime);
+footer .tiny-castle {
+  font-size:25px;
+  color:#a789bd;
+  display:block;
+  margin-bottom:9px;
 }
 
-/* MOBILE */
-@media(max-width:760px) {
-  nav {
-    padding: 0 6%;
-    height: 66px;
+footer small {
+  display:block;
+  margin-top:12px;
+  font-size:10px;
+  letter-spacing:1px;
+  color:#9b85a7;
+}
+
+@media(max-width:800px) {
+  .topbar {
+    padding:13px 5%;
+    flex-direction:column;
   }
 
-  .links {
-    gap: 12px;
-    font-size: 10px;
+  nav {
+    justify-content:center;
+    gap:18px;
   }
 
   .hero {
-    width: 90%;
-    padding: 45px 7%;
-    min-height: 390px;
+    min-height:570px;
+    padding-bottom:205px;
+    background-position:48% center;
   }
 
-  .orbit {
-    right: -140px;
-    opacity: .6;
-  }
+  .resources { margin-top:-160px; }
 
-  .section {
-    width: 90%;
-    margin-top: 45px;
-  }
+  .cards { grid-template-columns:repeat(2,1fr); }
 
-  .section-top {
-    display: block;
-  }
-
-  .section-top p {
-    margin-top: 8px;
-  }
-
-  .cards {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-  }
-
-  .card {
-    min-height: 190px;
-    padding: 19px;
-  }
-
-  .card h3 {
-    font-size: 21px;
-  }
-
-  footer {
-    gap: 15px;
-    flex-wrap: wrap;
-  }
+  .card { min-height:225px; }
 }
 
-@media(max-width:390px) {
-  .links {
-    gap: 8px;
-    font-size: 9px;
+@media(max-width:420px) {
+  .brand { font-size:21px; }
+
+  nav { gap:12px; }
+
+  nav a { font-size:10px; }
+
+  .hero {
+    min-height:535px;
+    padding-top:65px;
   }
 
-  .logo {
-    font-size: 16px;
+  .resources {
+    width:92%;
+    margin-top:-140px;
   }
+
+  .cards { gap:10px; }
+
+  .card {
+    padding:23px 10px;
+    min-height:210px;
+  }
+
+  .card h2 { font-size:24px; }
+
+  .card p { font-size:12px; }
+
+  .card-icon { font-size:36px; }
 }
 </style>
 </head>
 
 <body>
 
-<nav>
-  <div class="logo">
-    ARUNSIRIKAN<span>✳</span>
+<header class="topbar">
+  <div class="brand">
+    <span class="crown">♛</span>ARUNSIRIKAN'S
+    <small>CLASSROOM</small>
   </div>
 
-  <div class="links">
-    <a href="index.html">HOME</a>
-    <a href="games.html">GAMES</a>
-    <a href="worksheets.html">MATERIALS</a>
-    <a href="#about">ABOUT</a>
-  </div>
-</nav>
+  <nav aria-label="Main navigation">
+    <a href="index.html">⌂ HOME</a>
+    <a href="games.html">♧ GAMES</a>
+    <a href="worksheets.html">BOOK MATERIALS</a>
+    <a href="#about">✧ ABOUT</a>
+  </nav>
+</header>
 
 <main>
 
-  <section class="hero">
-    <div class="hero-copy">
+<section class="hero">
+  <div class="hero-content">
+    <div class="crown-mark">♛</div>
+    <div class="kicker">WELCOME, DEAR LEARNER</div>
 
-      <div class="eyebrow">
-        WELCOME TO MY ENGLISH CLASSROOM ✦
-      </div>
+    <h1>
+      ARUNSIRIKAN'S<br>CLASSROOM
+    </h1>
 
-      <h1>
-        LESS STUDY STRESS.<br>
-        <em>MORE ENGLISH FUN.</em>
-      </h1>
-
-      <p>
-        Explore. Play. Practice.
-        Learn English your way!
-      </p>
-
-      <a class="cta" href="games.html">
-        LET'S EXPLORE ↗
-      </a>
-
+    <div class="subtitle">
+      The Enchanted English Academy
     </div>
 
-    <div class="orbit"></div>
-    <div class="spark">✦</div>
-  </section>
+    <p>Where every lesson begins with a little magic. ✦</p>
 
-  <section class="section">
+    <a class="cta" href="games.html">
+      LET'S EXPLORE ❯
+    </a>
+  </div>
+</section>
 
-    <div class="section-top">
-      <h2>Pick your vibe. ✌️</h2>
-      <p>A little practice. A lot more confidence.</p>
+<section class="resources">
+  <h2 class="section-heading">
+    Choose Your <span>Magic</span> ✧
+  </h2>
+
+  <div class="cards">
+
+    <a class="card" href="games.html">
+      <span class="card-icon">🎮</span>
+      <h2>GAMES</h2>
+      <p>Play, practice,<br>and level up!</p>
+      <span class="card-button">Go to Games →</span>
+    </a>
+
+    <a class="card" href="worksheets.html">
+      <span class="card-icon">📜</span>
+      <h2>WORKSHEETS</h2>
+      <p>Practice your English<br>skills.</p>
+      <span class="card-button">Explore Materials →</span>
+    </a>
+
+    <div class="card soon">
+      <span class="card-icon">🏆</span>
+      <h2>QUIZZES</h2>
+      <p>Challenge yourself<br>and shine!</p>
+      <span class="card-button">Coming Soon ✧</span>
     </div>
 
-    <div class="cards">
-
-      <a class="card games"
-         href="games.html"
-         style="color:inherit;text-decoration:none">
-
-        <span class="icon">🎮</span>
-        <h3>GAMES</h3>
-        <p>Play &amp; have fun!</p>
-        <span class="arrow">↗</span>
-
-      </a>
-
-      <a class="card worksheets"
-         href="worksheets.html"
-         style="color:inherit;text-decoration:none">
-
-        <span class="icon">📝</span>
-        <h3>WORKSHEETS</h3>
-        <p>Practice your skills!</p>
-        <span class="arrow">↗</span>
-
-      </a>
-
-      <div class="card quizzes">
-        <span class="icon">🏆</span>
-        <h3>QUIZZES</h3>
-        <p>Challenge yourself.</p>
-        <span class="soon">COMING SOON</span>
-      </div>
-
-      <div class="card vocab">
-        <span class="icon">💡</span>
-        <h3>VOCABULARY</h3>
-        <p>Build your word power.</p>
-        <span class="soon">COMING SOON</span>
-      </div>
-
+    <div class="card soon">
+      <span class="card-icon">📖</span>
+      <h2>VOCABULARY</h2>
+      <p>Build your word<br>power.</p>
+      <span class="card-button">Coming Soon ✧</span>
     </div>
-  </section>
+
+  </div>
+</section>
 
 </main>
 
 <footer id="about">
-  <div>
-    LEARN YOUR WAY.
-    <span>BE YOURSELF.</span>
-  </div>
-
-  <div>
-    ARUNSIRIKAN'S CLASSROOM © 2026
-  </div>
+  <span class="tiny-castle">♜ ✦ ♜</span>
+  LESSON ✧ PRACTICE ✧ PLAY ✧ GROW
+  <small>ARUNSIRIKAN'S CLASSROOM © 2026</small>
 </footer>
 
 </body>
