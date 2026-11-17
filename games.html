@@ -257,5 +257,31 @@ h1 {
   </div>
 
 </div>
+  <script>
+const m3 = document.getElementById('m3');
+const m4 = document.getElementById('m4');
+
+function showClassroom(id) {
+  m3.style.display = id === 'm3' ? '' : 'none';
+  m4.style.display = id === 'm4' ? '' : 'none';
+  document.getElementById(id).scrollIntoView({
+    behavior: 'smooth'
+  });
+}
+
+document.querySelector('a[href="#m3"]').addEventListener('click', function(e) {
+  e.preventDefault();
+  showClassroom('m3');
+});
+
+document.querySelector('a[href="#m4"]').addEventListener('click', function(e) {
+  e.preventDefault();
+  showClassroom('m4');
+});
+
+m3.style.display = 'none';
+m4.style.display = 'none';
+</script>
+  
 </body>
 </html>
